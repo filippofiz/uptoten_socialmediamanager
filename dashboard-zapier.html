@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Social Media Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .uptoten-green { color: #00a666; }
+        .uptoten-blue { color: #1c2545; }
+        .bg-uptoten-green { background-color: #00a666; }
+        .bg-uptoten-blue { background-color: #1c2545; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold">
+                        <span class="uptoten-green">Up to Ten</span>
+                        <span class="uptoten-blue">Social Media Manager</span>
+                    </h1>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-sm text-gray-600">Zapier Connesso</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Column - Quick Actions -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- AI Content Generator -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <span class="text-2xl mr-2">🤖</span>
+                            Genera Contenuto con AI
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Tema</label>
+                                <select id="theme" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="motivational">💪 Motivazionale</option>
+                                    <option value="tips">💡 Consigli Studio</option>
+                                    <option value="science">🔬 Curiosità STEM</option>
+                                    <option value="success">🏆 Storia di Successo</option>
+                                    <option value="announcement">📢 Annuncio</option>
+                                    <option value="seasonal">🎄 Stagionale</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Piattaforme</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                        <input type="checkbox" class="platform-check mr-2" value="facebook" checked>
+                                        <span class="text-blue-600">📘 Facebook</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                        <input type="checkbox" class="platform-check mr-2" value="instagram" checked>
+                                        <span class="text-purple-600">📷 Instagram</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                        <input type="checkbox" class="platform-check mr-2" value="twitter" checked>
+                                        <span class="text-blue-400">🐦 Twitter</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                        <input type="checkbox" class="platform-check mr-2" value="linkedin" checked>
+                                        <span class="text-blue-700">💼 LinkedIn</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button onclick="generateAIContent()" 
+                                    class="w-full px-6 py-3 bg-uptoten-green text-white rounded-lg hover:opacity-90 font-semibold">
+                                🎯 Genera e Pubblica
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Post -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <span class="text-2xl mr-2">✏️</span>
+                            Post Manuale
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <textarea id="manualMessage" 
+                                      rows="4" 
+                                      class="w-full px-3 py-2 border rounded-lg"
+                                      placeholder="Scrivi il tuo messaggio..."></textarea>
+                            
+                            <button onclick="sendManualPost()" 
+                                    class="w-full px-6 py-3 bg-uptoten-blue text-white rounded-lg hover:opacity-90 font-semibold">
+                                📤 Pubblica Ora
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results -->
+                    <div id="results" class="hidden bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold mb-3">📊 Risultato</h3>
+                        <div id="resultContent"></div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Templates & History -->
+                <div class="space-y-6">
+                    
+                    <!-- Quick Templates -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold mb-4">⚡ Template Rapidi</h3>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('morning')" 
+                                    class="w-full p-3 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg hover:shadow text-left">
+                                <div class="font-semibold">☀️ Buongiorno</div>
+                                <div class="text-xs text-gray-600">Motivazione mattutina</div>
+                            </button>
+                            
+                            <button onclick="useTemplate('tip')" 
+                                    class="w-full p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg hover:shadow text-left">
+                                <div class="font-semibold">💡 Tip del Giorno</div>
+                                <div class="text-xs text-gray-600">Consiglio pratico</div>
+                            </button>
+                            
+                            <button onclick="useTemplate('quote')" 
+                                    class="w-full p-3 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg hover:shadow text-left">
+                                <div class="font-semibold">💭 Citazione</div>
+                                <div class="text-xs text-gray-600">Frase ispirante</div>
+                            </button>
+                            
+                            <button onclick="useTemplate('promo')" 
+                                    class="w-full p-3 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg hover:shadow text-left">
+                                <div class="font-semibold">🎯 Promo</div>
+                                <div class="text-xs text-gray-600">Promozione servizi</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Posts -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold mb-4">📅 Post Recenti</h3>
+                        <div id="recentPosts" class="space-y-3 text-sm">
+                            <p class="text-gray-500">I post pubblicati appariranno qui...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold mb-4">📈 Statistiche</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Post Oggi:</span>
+                                <span id="todayPosts" class="font-semibold">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Post Settimana:</span>
+                                <span id="weekPosts" class="font-semibold">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Totale Post:</span>
+                                <span id="totalPosts" class="font-semibold">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ZAPIER_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/16844015/uu50wtr/';
+        
+        // Templates
+        const templates = {
+            morning: `☀️ Buongiorno da Up to Ten!
+
+"Ogni giorno è una nuova opportunità per imparare qualcosa di straordinario."
+
+Pronti per affrontare le sfide di oggi? Noi siamo qui per supportarvi! 💪
+
+#UpToTen #BuongiornoMilano #Motivazione #RipetizioniMilano`,
+            
+            tip: `💡 TIP STUDIO DEL GIORNO
+
+La Regola del 2-Minuti: Se qualcosa richiede meno di 2 minuti, fallo subito!
+
+✅ Rivedere una formula
+✅ Organizzare gli appunti
+✅ Preparare il materiale
+
+Piccole azioni, grandi risultati! 🎯
+
+#UpToTen #StudyTips #Produttività #MetodoDiStudio`,
+            
+            quote: `💭 "Non è la materia ad essere difficile, è il metodo che fa la differenza."
+
+In Up to Ten crediamo che ogni studente possa eccellere con il giusto approccio.
+
+Qual è la tua materia "impossibile"? Trasformiamola insieme nella tua preferita! 🚀
+
+#UpToTen #Motivazione #Educazione #Milano`,
+            
+            promo: `🎯 Hai bisogno di un boost nelle materie scientifiche?
+
+✨ Up to Ten ti offre:
+📚 Tutor qualificati
+🎯 Metodo personalizzato
+🏃‍♂️ Approccio pratico (anche con lo sport!)
+📍 Milano e online
+
+Prima lezione conoscitiva? Contattaci!
+
+#UpToTen #RipetizioniMilano #STEM #Matematica #Fisica`
+        };
+        
+        // Load saved posts
+        let savedPosts = JSON.parse(localStorage.getItem('uptoten_posts') || '[]');
+        
+        window.onload = function() {
+            updateStats();
+            updateRecentPosts();
+        }
+        
+        // Generate AI Content (Simulated)
+        async function generateAIContent() {
+            const theme = document.getElementById('theme').value;
+            const platforms = getSelectedPlatforms();
+            
+            if (platforms.length === 0) {
+                alert('Seleziona almeno una piattaforma!');
+                return;
+            }
+            
+            showResult('loading', 'Generazione contenuto AI in corso...');
+            
+            // Simulate AI generation
+            const aiContents = {
+                motivational: `💪 La determinazione di oggi è il successo di domani!
+
+In Up to Ten crediamo che ogni ostacolo sia un'opportunità di crescita. Che sia matematica, fisica o informatica, insieme possiamo trasformare le difficoltà in punti di forza!
+
+"Il successo è la somma di piccoli sforzi ripetuti giorno dopo giorno." 🌟
+
+#UpToTen #Motivazione #SuccessoScolastico #RipetizioniMilano #NonMollare`,
+                
+                tips: `📚 METODO FEYNMAN per studiare meglio:
+
+1️⃣ Scegli un concetto
+2️⃣ Spiegalo come a un bambino
+3️⃣ Identifica le lacune
+4️⃣ Semplifica e ripeti
+
+Se non riesci a spiegarlo semplicemente, non l'hai capito abbastanza! 💡
+
+Vuoi altri metodi efficaci? Vieni da Up to Ten!
+
+#UpToTen #MetodoDiStudio #StudyHacks #Feynman #Milano`,
+                
+                science: `🔬 SCIENZA STUPEFACENTE!
+
+Lo sapevi che il tuo smartphone ha più potenza di calcolo del computer che ha portato l'uomo sulla Luna? 🚀
+
+La tecnologia evolve, ma i principi matematici e fisici rimangono gli stessi. Impariamoli insieme in modo divertente!
+
+#UpToTen #CuriositàSTEM #Scienza #Tecnologia #DidatticaInnovativa`,
+                
+                success: `🎉 COMPLIMENTI MARCO!
+
+Da 5 in matematica a 8 in soli 3 mesi! 📈
+
+"Con Up to Ten ho scoperto che la matematica può essere anche divertente. Il trucco? Collegarla alle mie passioni!"
+
+Vuoi essere il prossimo? Contattaci! 
+
+#UpToTen #SuccessStory #Matematica #RipetizioniMilano #CeLAbbiamFatta`,
+                
+                announcement: `📢 NOVITÀ ENTUSIASMANTE!
+
+Up to Ten introduce le sessioni di gruppo "STEM & Sport" 🏃‍♂️📐
+
+Impara fisica attraverso il movimento e matematica con esempi pratici dallo sport!
+
+🗓 Ogni sabato mattina
+📍 Milano zona Porta Romana
+👥 Max 6 studenti
+
+Info e iscrizioni sul nostro sito!
+
+#UpToTen #STEMeSport #Innovazione #Milano #NuoviCorsi`,
+                
+                seasonal: `🎄 SPECIALE FESTIVITÀ!
+
+Le vacanze sono il momento perfetto per recuperare e prepararsi al nuovo anno! 
+
+Up to Ten ti offre:
+✨ Pacchetti intensivi vacanze
+🎁 Sconto 15% prenotazioni dicembre
+📚 Materiali di studio in regalo
+
+Non aspettare gennaio, inizia ora!
+
+#UpToTen #OffertaSpeciale #VacanzeStudio #Milano #Natale2024`
+            };
+            
+            const content = aiContents[theme] || aiContents.motivational;
+            
+            // Send to Zapier
+            setTimeout(async () => {
+                await sendToZapier({
+                    message: content,
+                    platforms: platforms,
+                    hashtags: extractHashtags(content),
+                    metadata: {
+                        theme: theme,
+                        generatedBy: 'AI Generator',
+                        timestamp: new Date().toISOString(),
+                        brand: 'Up to Ten - Ripetizioni Milano'
+                    }
+                });
+            }, 2000);
+        }
+        
+        // Send Manual Post
+        async function sendManualPost() {
+            const message = document.getElementById('manualMessage').value.trim();
+            const platforms = getSelectedPlatforms();
+            
+            if (!message) {
+                alert('Scrivi un messaggio!');
+                return;
+            }
+            
+            if (platforms.length === 0) {
+                alert('Seleziona almeno una piattaforma!');
+                return;
+            }
+            
+            await sendToZapier({
+                message: message,
+                platforms: platforms,
+                hashtags: extractHashtags(message),
+                metadata: {
+                    theme: 'manual',
+                    generatedBy: 'Manual Input',
+                    timestamp: new Date().toISOString(),
+                    brand: 'Up to Ten - Ripetizioni Milano'
+                }
+            });
+            
+            document.getElementById('manualMessage').value = '';
+        }
+        
+        // Send to Zapier with form method
+        async function sendToZapier(data) {
+            showResult('loading', 'Invio a Zapier in corso...');
+            
+            // Create form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = ZAPIER_WEBHOOK;
+            form.target = 'zapier_iframe';
+            
+            // Add data as form fields
+            Object.keys(data).forEach(key => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
+                form.appendChild(input);
+            });
+            
+            // Create hidden iframe
+            const iframe = document.createElement('iframe');
+            iframe.name = 'zapier_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            // Submit form
+            document.body.appendChild(form);
+            form.submit();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 1000);
+            
+            // Save to local storage
+            const post = {
+                id: Date.now(),
+                message: data.message,
+                platforms: data.platforms,
+                timestamp: new Date().toISOString()
+            };
+            
+            savedPosts.unshift(post);
+            savedPosts = savedPosts.slice(0, 50); // Keep last 50
+            localStorage.setItem('uptoten_posts', JSON.stringify(savedPosts));
+            
+            // Show success
+            setTimeout(() => {
+                showResult('success', `✅ Post inviato con successo a Zapier!
+                
+Piattaforme: ${data.platforms.join(', ')}
+                
+Il post verrà pubblicato automaticamente su tutti i social selezionati.`);
+                updateStats();
+                updateRecentPosts();
+            }, 2000);
+        }
+        
+        // Utility functions
+        function getSelectedPlatforms() {
+            const platforms = [];
+            document.querySelectorAll('.platform-check:checked').forEach(cb => {
+                platforms.push(cb.value);
+            });
+            return platforms;
+        }
+        
+        function extractHashtags(text) {
+            const matches = text.match(/#\w+/g);
+            return matches || [];
+        }
+        
+        function useTemplate(type) {
+            document.getElementById('manualMessage').value = templates[type];
+            document.getElementById('manualMessage').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultContent');
+            
+            resultDiv.classList.remove('hidden');
+            
+            if (type === 'loading') {
+                contentDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-uptoten-green mr-3"></div>
+                        <span>${message}</span>
+                    </div>
+                `;
+            } else if (type === 'success') {
+                contentDiv.innerHTML = `
+                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <pre class="text-green-700 whitespace-pre-wrap">${message}</pre>
+                    </div>
+                `;
+            } else {
+                contentDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-700">${message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateStats() {
+            const today = new Date().toDateString();
+            const thisWeek = getWeekNumber(new Date());
+            
+            let todayCount = 0;
+            let weekCount = 0;
+            
+            savedPosts.forEach(post => {
+                const postDate = new Date(post.timestamp);
+                if (postDate.toDateString() === today) todayCount++;
+                if (getWeekNumber(postDate) === thisWeek) weekCount++;
+            });
+            
+            document.getElementById('todayPosts').textContent = todayCount;
+            document.getElementById('weekPosts').textContent = weekCount;
+            document.getElementById('totalPosts').textContent = savedPosts.length;
+        }
+        
+        function updateRecentPosts() {
+            const container = document.getElementById('recentPosts');
+            
+            if (savedPosts.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">I post pubblicati appariranno qui...</p>';
+                return;
+            }
+            
+            container.innerHTML = savedPosts.slice(0, 5).map(post => {
+                const date = new Date(post.timestamp);
+                return `
+                    <div class="pb-3 border-b last:border-0">
+                        <div class="text-xs text-gray-500">${date.toLocaleString('it-IT')}</div>
+                        <div class="text-sm mt-1">${post.message.substring(0, 60)}...</div>
+                        <div class="text-xs text-gray-600 mt-1">${post.platforms.join(', ')}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+    </script>
+</body>
+</html>

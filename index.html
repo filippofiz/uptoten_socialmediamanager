@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Up to Ten Social Media Manager - AI-powered social media management platform">
+    <meta name="keywords" content="social media, management, AI, content generation, scheduling">
+    <title>Up to Ten Social Media Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .uptoten-green { color: #00a666; }
+        .uptoten-blue { color: #1c2545; }
+        .bg-uptoten-green { background-color: #00a666; }
+        .bg-uptoten-blue { background-color: #1c2545; }
+        .hover-uptoten-green:hover { background-color: #008855; }
+        .hover-uptoten-blue:hover { background-color: #151d33; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #00a666 0%, #1c2545 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold">
+                        <span class="uptoten-green">Up to Ten</span>
+                        <span class="uptoten-blue">Social Media Manager</span>
+                    </h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-700 hover:text-gray-900 transition">Features</a>
+                    <a href="#dashboard" class="text-gray-700 hover:text-gray-900 transition">Dashboard</a>
+                    <a href="#tools" class="text-gray-700 hover:text-gray-900 transition">Tools</a>
+                    <a href="#contact" class="text-gray-700 hover:text-gray-900 transition">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 fade-in">
+                    AI-Powered Social Media Management
+                </h2>
+                <p class="text-xl md:text-2xl mb-8 fade-in" style="animation-delay: 0.2s">
+                    Streamline your social media strategy with intelligent automation
+                </p>
+                <div class="flex justify-center gap-4 fade-in" style="animation-delay: 0.4s">
+                    <a href="dashboard-zapier.html" 
+                       class="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105">
+                        Open Dashboard
+                    </a>
+                    <a href="#features" 
+                       class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">
+                <span class="uptoten-blue">Powerful Features</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h3 class="text-xl font-semibold mb-3 uptoten-green">AI Content Generation</h3>
+                    <p class="text-gray-600">Generate engaging social media content with advanced AI technology tailored to your brand voice.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="text-4xl mb-4">📅</div>
+                    <h3 class="text-xl font-semibold mb-3 uptoten-green">Smart Scheduling</h3>
+                    <p class="text-gray-600">Automatically schedule posts at optimal times based on audience engagement patterns.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="text-4xl mb-4">🔗</div>
+                    <h3 class="text-xl font-semibold mb-3 uptoten-green">Zapier Integration</h3>
+                    <p class="text-gray-600">Seamlessly connect with thousands of apps through Zapier for enhanced workflow automation.</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-3 uptoten-green">Analytics Dashboard</h3>
+                    <p class="text-gray-600">Track performance metrics and gain insights to optimize your social media strategy.</p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="text-4xl mb-4">🎨</div>
+                    <h3 class="text-xl font-semibold mb-3 uptoten-green">Visual Content Creator</h3>
+                    <p class="text-gray-600">Design stunning graphics and edit images directly within the platform.</p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="text-4xl mb-4">🏆</div>
+                    <h3 class="text-xl font-semibold mb-3 uptoten-green">Competitor Analysis</h3>
+                    <p class="text-gray-600">Monitor competitor strategies and stay ahead with data-driven insights.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview Section -->
+    <section id="dashboard" class="py-16 bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">
+                    <span class="uptoten-blue">Intuitive Dashboard</span>
+                </h2>
+                <p class="text-xl text-gray-600">Manage all your social media accounts from one centralized platform</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 uptoten-green">Everything You Need</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Real-time social media feed monitoring</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Bulk content scheduling and management</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Team collaboration tools</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Customizable workflow automation</span>
+                            </li>
+                        </ul>
+                        <a href="dashboard-zapier.html" 
+                           class="inline-block mt-6 bg-uptoten-green hover-uptoten-green text-white px-6 py-3 rounded-lg font-semibold transition transform hover:scale-105">
+                            Access Dashboard →
+                        </a>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded flex items-center justify-center">
+                                <span class="text-gray-500 text-lg">Dashboard Preview</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section id="tools" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">
+                <span class="uptoten-blue">Additional Tools</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <a href="generate-token.html" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                    <h3 class="font-semibold text-lg mb-2">Token Generator</h3>
+                    <p class="text-gray-600">Generate access tokens for API integration</p>
+                </a>
+                
+                <a href="update-token.html" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                    <h3 class="font-semibold text-lg mb-2">Token Updater</h3>
+                    <p class="text-gray-600">Update and manage your API tokens</p>
+                </a>
+                
+                <a href="fix-facebook-token.html" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                    <h3 class="font-semibold text-lg mb-2">Facebook Token Fix</h3>
+                    <p class="text-gray-600">Troubleshoot Facebook API token issues</p>
+                </a>
+                
+                <a href="zapier-integration.html" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                    <h3 class="font-semibold text-lg mb-2">Zapier Integration</h3>
+                    <p class="text-gray-600">Configure Zapier webhooks and automation</p>
+                </a>
+                
+                <a href="all-in-one-dashboard.html" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                    <h3 class="font-semibold text-lg mb-2">All-in-One Dashboard</h3>
+                    <p class="text-gray-600">Comprehensive management interface</p>
+                </a>
+                
+                <a href="alternative-solutions.html" class="block bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                    <h3 class="font-semibold text-lg mb-2">Alternative Solutions</h3>
+                    <p class="text-gray-600">Explore other integration options</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-8">
+                <span class="uptoten-blue">Get Started Today</span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-8">
+                Ready to transform your social media management?
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="dashboard-zapier.html" 
+                   class="bg-uptoten-green hover-uptoten-green text-white px-8 py-3 rounded-lg font-semibold transition transform hover:scale-105">
+                    Launch Dashboard
+                </a>
+                <a href="zapier-setup-guide.md" 
+                   class="bg-uptoten-blue hover-uptoten-blue text-white px-8 py-3 rounded-lg font-semibold transition">
+                    View Setup Guide
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-uptoten-blue text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="mb-2">© 2024 Up to Ten Social Media Manager. All rights reserved.</p>
+                <p class="text-sm opacity-75">Powered by AI and built with passion</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all feature cards
+        document.querySelectorAll('#features .bg-white, #tools a').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

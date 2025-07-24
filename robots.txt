@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Exclude backend and development files
+Disallow: /backend/
+Disallow: /frontend/src/
+Disallow: /tests/
+Disallow: /database/
+Disallow: /node_modules/
+
+# Sitemap location (update after deployment)
+# Sitemap: https://filippofiz.github.io/uptoten_socialmediamanager/sitemap.xml

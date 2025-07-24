@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Schedulazione Automatica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .uptoten-green { color: #00a666; }
+        .uptoten-blue { color: #1c2545; }
+        .bg-uptoten-green { background-color: #00a666; }
+        .bg-uptoten-blue { background-color: #1c2545; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold">
+                        <span class="uptoten-green">Up to Ten</span>
+                        <span class="uptoten-blue">Auto Scheduler</span>
+                    </h1>
+                    <a href="index.html" class="text-sm text-gray-600 hover:text-gray-800">← Torna alla Home</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Configurazione Schedulazione -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Stato Scheduler -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center justify-between">
+                            <span>⏰ Stato Schedulazione</span>
+                            <div class="flex items-center gap-2">
+                                <span id="statusIndicator" class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                <span id="statusText" class="text-sm">Inattivo</span>
+                            </div>
+                        </h2>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="startScheduler()" 
+                                    id="startBtn"
+                                    class="px-6 py-3 bg-uptoten-green text-white rounded-lg hover:opacity-90 font-semibold">
+                                ▶️ Avvia Scheduler
+                            </button>
+                            <button onclick="stopScheduler()" 
+                                    id="stopBtn"
+                                    class="px-6 py-3 bg-red-600 text-white rounded-lg hover:opacity-90 font-semibold" disabled>
+                                ⏹️ Ferma Scheduler
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded">
+                            <p class="text-sm text-gray-600">
+                                <strong>Prossimo post:</strong> 
+                                <span id="nextPost">Non schedulato</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Configurazione Orari -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-4">📅 Configurazione Orari</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Frequenza Post</label>
+                                <select id="frequency" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="1">Ogni ora</option>
+                                    <option value="2">Ogni 2 ore</option>
+                                    <option value="3">Ogni 3 ore</option>
+                                    <option value="4" selected>Ogni 4 ore</option>
+                                    <option value="6">Ogni 6 ore</option>
+                                    <option value="8">Ogni 8 ore</option>
+                                    <option value="12">Ogni 12 ore</option>
+                                    <option value="24">Una volta al giorno</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Orari Attivi</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-xs">Dalle</label>
+                                        <input type="time" id="startTime" value="08:00" 
+                                               class="w-full px-3 py-2 border rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs">Alle</label>
+                                        <input type="time" id="endTime" value="20:00" 
+                                               class="w-full px-3 py-2 border rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Giorni Attivi</label>
+                                <div class="grid grid-cols-7 gap-2">
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="1" checked>
+                                        <span class="text-xs mt-1">Lun</span>
+                                    </label>
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="2" checked>
+                                        <span class="text-xs mt-1">Mar</span>
+                                    </label>
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="3" checked>
+                                        <span class="text-xs mt-1">Mer</span>
+                                    </label>
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="4" checked>
+                                        <span class="text-xs mt-1">Gio</span>
+                                    </label>
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="5" checked>
+                                        <span class="text-xs mt-1">Ven</span>
+                                    </label>
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="6">
+                                        <span class="text-xs mt-1">Sab</span>
+                                    </label>
+                                    <label class="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="days" value="0">
+                                        <span class="text-xs mt-1">Dom</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configurazione Contenuti -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-lg font-semibold mb-4">🎯 Strategia Contenuti</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Mix di Contenuti</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                        <span>💪 Motivazionale</span>
+                                        <input type="checkbox" name="themes" value="motivational" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                        <span>💡 Consigli Studio</span>
+                                        <input type="checkbox" name="themes" value="tips" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                        <span>🔬 Curiosità STEM</span>
+                                        <input type="checkbox" name="themes" value="science" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                        <span>🏆 Storie di Successo</span>
+                                        <input type="checkbox" name="themes" value="success" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                        <span>📢 Annunci</span>
+                                        <input type="checkbox" name="themes" value="announcement">
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                                        <span>🎄 Stagionale</span>
+                                        <input type="checkbox" name="themes" value="seasonal">
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Piattaforme</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center p-3 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="platforms" value="facebook" checked>
+                                        <span class="ml-2 text-blue-600">📘 Facebook</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="platforms" value="instagram" checked>
+                                        <span class="ml-2 text-purple-600">📷 Instagram</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="platforms" value="twitter" checked>
+                                        <span class="ml-2 text-blue-400">🐦 Twitter</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border rounded hover:bg-gray-50">
+                                        <input type="checkbox" name="platforms" value="linkedin" checked>
+                                        <span class="ml-2 text-blue-700">💼 LinkedIn</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="saveConfig()" 
+                                class="w-full mt-4 px-6 py-3 bg-uptoten-blue text-white rounded-lg hover:opacity-90 font-semibold">
+                            💾 Salva Configurazione
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    
+                    <!-- Statistiche -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold mb-4">📊 Statistiche</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span>Post Schedulati Oggi:</span>
+                                <span id="todayScheduled" class="font-semibold">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Post Pubblicati Oggi:</span>
+                                <span id="todayPublished" class="font-semibold">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Totale Questa Settimana:</span>
+                                <span id="weekTotal" class="font-semibold">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Log Attività -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold mb-4">📜 Attività Recenti</h3>
+                        <div id="activityLog" class="space-y-2 text-sm max-h-96 overflow-y-auto">
+                            <p class="text-gray-500">Nessuna attività recente</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Help -->
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="font-semibold mb-3">💡 Come Funziona</h3>
+                        <ol class="list-decimal list-inside text-sm space-y-2">
+                            <li>Configura gli orari e la frequenza</li>
+                            <li>Seleziona i tipi di contenuto</li>
+                            <li>Scegli le piattaforme</li>
+                            <li>Avvia lo scheduler</li>
+                            <li>I post verranno creati e pubblicati automaticamente!</li>
+                        </ol>
+                        <div class="mt-4 p-3 bg-yellow-50 rounded">
+                            <p class="text-xs text-yellow-800">
+                                <strong>Nota:</strong> Lo scheduler funziona solo quando questa pagina è aperta. 
+                                Per un servizio 24/7, considera l'hosting su un server.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ZAPIER_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/16844015/uu50wtr/';
+        
+        let schedulerInterval = null;
+        let isRunning = false;
+        let config = loadConfig();
+        let stats = loadStats();
+        
+        // Load saved configuration
+        function loadConfig() {
+            const saved = localStorage.getItem('uptoten_scheduler_config');
+            return saved ? JSON.parse(saved) : {
+                frequency: 4,
+                startTime: '08:00',
+                endTime: '20:00',
+                activeDays: [1, 2, 3, 4, 5],
+                themes: ['motivational', 'tips', 'science', 'success'],
+                platforms: ['facebook', 'instagram', 'twitter', 'linkedin']
+            };
+        }
+        
+        function loadStats() {
+            const saved = localStorage.getItem('uptoten_scheduler_stats');
+            return saved ? JSON.parse(saved) : {
+                todayScheduled: 0,
+                todayPublished: 0,
+                weekTotal: 0,
+                lastReset: new Date().toDateString()
+            };
+        }
+        
+        // Initialize UI with saved config
+        window.onload = function() {
+            document.getElementById('frequency').value = config.frequency;
+            document.getElementById('startTime').value = config.startTime;
+            document.getElementById('endTime').value = config.endTime;
+            
+            // Set active days
+            document.querySelectorAll('input[name="days"]').forEach(cb => {
+                cb.checked = config.activeDays.includes(parseInt(cb.value));
+            });
+            
+            // Set themes
+            document.querySelectorAll('input[name="themes"]').forEach(cb => {
+                cb.checked = config.themes.includes(cb.value);
+            });
+            
+            // Set platforms
+            document.querySelectorAll('input[name="platforms"]').forEach(cb => {
+                cb.checked = config.platforms.includes(cb.value);
+            });
+            
+            updateStats();
+            updateNextPostTime();
+        }
+        
+        // Save configuration
+        function saveConfig() {
+            config.frequency = parseInt(document.getElementById('frequency').value);
+            config.startTime = document.getElementById('startTime').value;
+            config.endTime = document.getElementById('endTime').value;
+            
+            config.activeDays = [];
+            document.querySelectorAll('input[name="days"]:checked').forEach(cb => {
+                config.activeDays.push(parseInt(cb.value));
+            });
+            
+            config.themes = [];
+            document.querySelectorAll('input[name="themes"]:checked').forEach(cb => {
+                config.themes.push(cb.value);
+            });
+            
+            config.platforms = [];
+            document.querySelectorAll('input[name="platforms"]:checked').forEach(cb => {
+                config.platforms.push(cb.value);
+            });
+            
+            localStorage.setItem('uptoten_scheduler_config', JSON.stringify(config));
+            
+            addToLog('✅ Configurazione salvata');
+            updateNextPostTime();
+            
+            alert('Configurazione salvata con successo!');
+        }
+        
+        // Start scheduler
+        function startScheduler() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            document.getElementById('statusIndicator').classList.remove('bg-red-500');
+            document.getElementById('statusIndicator').classList.add('bg-green-500', 'animate-pulse');
+            document.getElementById('statusText').textContent = 'Attivo';
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            addToLog('🚀 Scheduler avviato');
+            
+            // Check immediately
+            checkAndPost();
+            
+            // Then check every minute
+            schedulerInterval = setInterval(checkAndPost, 60000);
+            
+            updateNextPostTime();
+        }
+        
+        // Stop scheduler
+        function stopScheduler() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            document.getElementById('statusIndicator').classList.remove('bg-green-500', 'animate-pulse');
+            document.getElementById('statusIndicator').classList.add('bg-red-500');
+            document.getElementById('statusText').textContent = 'Inattivo';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            
+            if (schedulerInterval) {
+                clearInterval(schedulerInterval);
+                schedulerInterval = null;
+            }
+            
+            addToLog('⏹️ Scheduler fermato');
+            document.getElementById('nextPost').textContent = 'Non schedulato';
+        }
+        
+        // Check if it's time to post
+        function checkAndPost() {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            // Check if today is active
+            if (!config.activeDays.includes(currentDay)) {
+                return;
+            }
+            
+            // Check if within active hours
+            if (currentTime < config.startTime || currentTime > config.endTime) {
+                return;
+            }
+            
+            // Check if it's time to post based on frequency
+            const lastPost = localStorage.getItem('uptoten_last_post');
+            if (lastPost) {
+                const lastPostTime = new Date(lastPost);
+                const hoursSinceLastPost = (now - lastPostTime) / (1000 * 60 * 60);
+                
+                if (hoursSinceLastPost < config.frequency) {
+                    return;
+                }
+            }
+            
+            // Time to post!
+            createAndPublishPost();
+        }
+        
+        // Create and publish a post
+        async function createAndPublishPost() {
+            if (config.themes.length === 0 || config.platforms.length === 0) {
+                addToLog('⚠️ Nessun tema o piattaforma selezionata');
+                return;
+            }
+            
+            addToLog('🤖 Generazione contenuto AI...');
+            
+            // Select random theme
+            const theme = config.themes[Math.floor(Math.random() * config.themes.length)];
+            
+            // Generate content (simulated)
+            const content = generateContent(theme);
+            
+            // Send to Zapier
+            try {
+                await sendToZapier({
+                    message: content.message,
+                    platforms: config.platforms,
+                    hashtags: content.hashtags,
+                    metadata: {
+                        theme: theme,
+                        generatedBy: 'Auto Scheduler',
+                        timestamp: new Date().toISOString(),
+                        brand: 'Up to Ten - Ripetizioni Milano'
+                    }
+                });
+                
+                // Update last post time
+                localStorage.setItem('uptoten_last_post', new Date().toISOString());
+                
+                // Update stats
+                stats.todayPublished++;
+                stats.weekTotal++;
+                updateStats();
+                
+                addToLog(`✅ Post pubblicato: ${theme}`);
+                updateNextPostTime();
+                
+            } catch (error) {
+                addToLog(`❌ Errore: ${error.message}`);
+            }
+        }
+        
+        // Generate content based on theme
+        function generateContent(theme) {
+            const contents = {
+                motivational: {
+                    message: `💪 ${getMotivationalQuote()}\n\nIn Up to Ten crediamo nel potenziale di ogni studente. Insieme possiamo trasformare ogni sfida in un'opportunità di crescita!\n\n#UpToTen #Motivazione #RipetizioniMilano #StudiaConNoi`,
+                    hashtags: ['#UpToTen', '#Motivazione', '#RipetizioniMilano', '#StudiaConNoi']
+                },
+                tips: {
+                    message: `📚 CONSIGLIO DEL GIORNO: ${getStudyTip()}\n\nVuoi altri consigli personalizzati? I nostri tutor sono qui per aiutarti!\n\n#UpToTen #StudyTips #MetodoDiStudio #Milano`,
+                    hashtags: ['#UpToTen', '#StudyTips', '#MetodoDiStudio', '#Milano']
+                },
+                science: {
+                    message: `🔬 LO SAPEVI CHE? ${getScienceFact()}\n\nLa scienza è ovunque! Scoprila con i nostri tutor specializzati.\n\n#UpToTen #STEM #Scienza #DidatticaInnovativa`,
+                    hashtags: ['#UpToTen', '#STEM', '#Scienza', '#DidatticaInnovativa']
+                },
+                success: {
+                    message: `🎉 SUCCESSO STUDENTE!\n\n${getSuccessStory()}\n\nAnche tu puoi farcela! Contattaci per iniziare il tuo percorso.\n\n#UpToTen #SuccessStory #RipetizioniMilano #CeLAbbiamFatta`,
+                    hashtags: ['#UpToTen', '#SuccessStory', '#RipetizioniMilano', '#CeLAbbiamFatta']
+                },
+                announcement: {
+                    message: `📢 NOVITÀ DA UP TO TEN!\n\n${getAnnouncement()}\n\nPer info e iscrizioni, contattaci!\n\n#UpToTen #Novità #Milano #Ripetizioni`,
+                    hashtags: ['#UpToTen', '#Novità', '#Milano', '#Ripetizioni']
+                },
+                seasonal: {
+                    message: `🎄 ${getSeasonalMessage()}\n\nUp to Ten ti augura una fantastica giornata!\n\n#UpToTen #Milano #Stagione`,
+                    hashtags: ['#UpToTen', '#Milano', '#Stagione']
+                }
+            };
+            
+            return contents[theme] || contents.motivational;
+        }
+        
+        // Content generators
+        function getMotivationalQuote() {
+            const quotes = [
+                '"Il successo è la somma di piccoli sforzi ripetuti giorno dopo giorno."',
+                '"Ogni esperto è stato una volta un principiante."',
+                '"L\'educazione è l\'arma più potente per cambiare il mondo."',
+                '"Non è mai troppo tardi per essere ciò che avresti potuto essere."',
+                '"Il futuro appartiene a coloro che credono nella bellezza dei propri sogni."'
+            ];
+            return quotes[Math.floor(Math.random() * quotes.length)];
+        }
+        
+        function getStudyTip() {
+            const tips = [
+                'Usa la tecnica del Pomodoro: 25 minuti di studio, 5 di pausa!',
+                'Ripassa prima di dormire: il cervello consolida le informazioni durante il sonno.',
+                'Insegna ciò che hai imparato: è il modo migliore per memorizzare!',
+                'Crea mappe mentali colorate per visualizzare i concetti.',
+                'Studia in un luogo tranquillo e ben illuminato.'
+            ];
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+        
+        function getScienceFact() {
+            const facts = [
+                'Il tuo cervello usa il 20% dell\'energia del corpo pur essendo solo il 2% del peso!',
+                'Un fulmine è 5 volte più caldo della superficie del Sole!',
+                'Il DNA umano è al 99.9% identico in tutte le persone.',
+                'La luce impiega 8 minuti per viaggiare dal Sole alla Terra.',
+                'Il corpo umano contiene abbastanza carbonio per fare 900 matite!'
+            ];
+            return facts[Math.floor(Math.random() * facts.length)];
+        }
+        
+        function getSuccessStory() {
+            const stories = [
+                'Marco è passato da 5 a 8 in matematica in soli 3 mesi!',
+                'Sofia ha superato il test di ingegneria al primo tentativo!',
+                'Luca ha scoperto la passione per la fisica grazie ai nostri tutor!',
+                'Emma ha migliorato la media del 30% in un semestre!',
+                'Alessandro ora aiuta i compagni con le materie che prima odiava!'
+            ];
+            return stories[Math.floor(Math.random() * stories.length)];
+        }
+        
+        function getAnnouncement() {
+            const announcements = [
+                'Nuovi corsi di preparazione esami disponibili!',
+                'Sessioni di gruppo STEM & Sport ogni sabato!',
+                'Sconto 15% per chi si iscrive questo mese!',
+                'Webinar gratuito sulle tecniche di memoria!',
+                'Aperte le iscrizioni per il summer camp!'
+            ];
+            return announcements[Math.floor(Math.random() * announcements.length)];
+        }
+        
+        function getSeasonalMessage() {
+            const month = new Date().getMonth();
+            if (month === 11 || month === 0 || month === 1) return 'Inverno è tempo di studio al caldo!';
+            if (month >= 2 && month <= 4) return 'La primavera porta nuove opportunità di apprendimento!';
+            if (month >= 5 && month <= 7) return 'Estate? Perfetta per recuperare con serenità!';
+            return 'L\'autunno è ideale per iniziare nuovi percorsi!';
+        }
+        
+        // Send to Zapier
+        async function sendToZapier(data) {
+            // Create form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = ZAPIER_WEBHOOK;
+            form.target = 'zapier_iframe';
+            
+            // Add data as form fields
+            Object.keys(data).forEach(key => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
+                form.appendChild(input);
+            });
+            
+            // Create hidden iframe
+            const iframe = document.createElement('iframe');
+            iframe.name = 'zapier_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            // Submit form
+            document.body.appendChild(form);
+            form.submit();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 1000);
+        }
+        
+        // Update statistics
+        function updateStats() {
+            // Reset daily stats if new day
+            const today = new Date().toDateString();
+            if (stats.lastReset !== today) {
+                stats.todayScheduled = 0;
+                stats.todayPublished = 0;
+                stats.lastReset = today;
+                
+                // Reset weekly stats if needed
+                if (new Date().getDay() === 1) {
+                    stats.weekTotal = 0;
+                }
+            }
+            
+            // Calculate scheduled posts for today
+            if (isRunning) {
+                const now = new Date();
+                const endHour = parseInt(config.endTime.split(':')[0]);
+                const currentHour = now.getHours();
+                const hoursLeft = Math.max(0, endHour - currentHour);
+                stats.todayScheduled = Math.floor(hoursLeft / config.frequency);
+            }
+            
+            // Update UI
+            document.getElementById('todayScheduled').textContent = stats.todayScheduled;
+            document.getElementById('todayPublished').textContent = stats.todayPublished;
+            document.getElementById('weekTotal').textContent = stats.weekTotal;
+            
+            // Save stats
+            localStorage.setItem('uptoten_scheduler_stats', JSON.stringify(stats));
+        }
+        
+        // Update next post time
+        function updateNextPostTime() {
+            if (!isRunning) {
+                document.getElementById('nextPost').textContent = 'Non schedulato';
+                return;
+            }
+            
+            const lastPost = localStorage.getItem('uptoten_last_post');
+            if (!lastPost) {
+                document.getElementById('nextPost').textContent = 'A breve';
+                return;
+            }
+            
+            const nextPostTime = new Date(lastPost);
+            nextPostTime.setHours(nextPostTime.getHours() + config.frequency);
+            
+            document.getElementById('nextPost').textContent = nextPostTime.toLocaleString('it-IT');
+        }
+        
+        // Add to activity log
+        function addToLog(message) {
+            const log = document.getElementById('activityLog');
+            const time = new Date().toLocaleTimeString('it-IT');
+            
+            const entry = document.createElement('div');
+            entry.className = 'p-2 bg-gray-50 rounded';
+            entry.innerHTML = `<span class="text-xs text-gray-500">${time}</span> ${message}`;
+            
+            log.insertBefore(entry, log.firstChild);
+            
+            // Keep only last 50 entries
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+        
+        // Auto-update stats every minute
+        setInterval(() => {
+            updateStats();
+            if (isRunning) {
+                updateNextPostTime();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>

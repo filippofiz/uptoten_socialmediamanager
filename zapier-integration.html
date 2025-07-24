@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Integrazione Zapier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-8">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8 text-center">
+                <span class="text-green-600">Up to Ten</span> + 
+                <span class="text-orange-500">Zapier</span> = 
+                <span class="text-blue-600">Automazione Totale</span>
+            </h1>
+
+            <!-- Come Funziona -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">🔄 Come Funziona</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <div class="text-3xl mb-2">🤖</div>
+                        <h3 class="font-bold">1. Genera</h3>
+                        <p class="text-sm">GPT crea contenuti</p>
+                    </div>
+                    
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <div class="text-3xl mb-2">📤</div>
+                        <h3 class="font-bold">2. Invia</h3>
+                        <p class="text-sm">Webhook a Zapier</p>
+                    </div>
+                    
+                    <div class="p-4 bg-orange-50 rounded-lg">
+                        <div class="text-3xl mb-2">⚡</div>
+                        <h3 class="font-bold">3. Zapier</h3>
+                        <p class="text-sm">Processa e distribuisce</p>
+                    </div>
+                    
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <div class="text-3xl mb-2">📱</div>
+                        <h3 class="font-bold">4. Pubblica</h3>
+                        <p class="text-sm">Su tutti i social</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setup Zapier -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">🛠️ Setup in 5 Minuti</h2>
+                
+                <ol class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">1</span>
+                        <div>
+                            <h3 class="font-bold">Crea Account Zapier</h3>
+                            <p class="text-gray-600">Vai su zapier.com - Piano free per iniziare</p>
+                            <a href="https://zapier.com/sign-up" target="_blank" class="text-blue-600 underline">Registrati →</a>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start">
+                        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">2</span>
+                        <div>
+                            <h3 class="font-bold">Crea un Nuovo Zap</h3>
+                            <p class="text-gray-600">Trigger: Webhook - Catches Hook</p>
+                            <div class="mt-2 p-3 bg-gray-100 rounded font-mono text-sm">
+                                Webhook URL: https://hooks.zapier.com/hooks/catch/xxx/yyy/
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start">
+                        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">3</span>
+                        <div>
+                            <h3 class="font-bold">Aggiungi Azioni Social</h3>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <div class="p-2 bg-blue-100 rounded text-sm">📘 Facebook Pages</div>
+                                <div class="p-2 bg-purple-100 rounded text-sm">📷 Instagram Business</div>
+                                <div class="p-2 bg-blue-200 rounded text-sm">🐦 Twitter</div>
+                                <div class="p-2 bg-blue-300 rounded text-sm">💼 LinkedIn</div>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start">
+                        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">4</span>
+                        <div>
+                            <h3 class="font-bold">Collega Account Social</h3>
+                            <p class="text-gray-600">Zapier ti guiderà per autorizzare ogni piattaforma</p>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start">
+                        <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">5</span>
+                        <div>
+                            <h3 class="font-bold">Fatto! Testa il Sistema</h3>
+                            <p class="text-gray-600">Usa il form sotto per inviare un post di test</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Test Zapier -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6">🧪 Test Zapier Integration</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Zapier Webhook URL</label>
+                        <input type="text" id="webhookUrl" placeholder="https://hooks.zapier.com/hooks/catch/..." 
+                               class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Messaggio</label>
+                        <textarea id="message" rows="4" 
+                                  class="w-full px-4 py-2 border rounded-lg"
+                                  placeholder="Test post da Up to Ten...">🎓 Test automatizzazione Up to Ten via Zapier!
+
+Stiamo testando il nuovo sistema di pubblicazione automatica.
+
+#UpToTen #Automazione #Test</textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Piattaforme</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" value="facebook" checked> Facebook
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" value="instagram" checked> Instagram
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" value="twitter" checked> Twitter
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" value="linkedin" checked> LinkedIn
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button onclick="sendToZapier()" 
+                            class="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-bold">
+                        ⚡ Invia a Zapier
+                    </button>
+                    
+                    <div id="result"></div>
+                </div>
+            </div>
+
+            <!-- Vantaggi -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-lg mb-3">💰 Costi</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>✅ Free: 100 task/mese</li>
+                        <li>✅ Starter: €20/mese (750 task)</li>
+                        <li>✅ Professional: €50/mese (2000 task)</li>
+                    </ul>
+                    <p class="text-xs text-gray-600 mt-3">1 post = 1 task per piattaforma</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-lg mb-3">🚀 Funzionalità</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>✅ Multi-step workflows</li>
+                        <li>✅ Scheduling integrato</li>
+                        <li>✅ Filtri e condizioni</li>
+                        <li>✅ Error handling</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-lg mb-3">🎯 Perché Zapier</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>✅ Nessun problema permessi</li>
+                        <li>✅ Sempre aggiornato</li>
+                        <li>✅ Support 24/7</li>
+                        <li>✅ 5000+ integrazioni</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Save Webhook -->
+            <div class="bg-blue-50 rounded-lg p-6">
+                <h3 class="font-bold mb-2">💾 Salva Configurazione</h3>
+                <button onclick="saveConfig()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Salva Webhook URL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved webhook
+        window.onload = function() {
+            const savedWebhook = localStorage.getItem('uptoten_zapier_webhook');
+            if (savedWebhook) {
+                document.getElementById('webhookUrl').value = savedWebhook;
+            }
+        }
+        
+        async function sendToZapier() {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!webhookUrl || !message) {
+                alert('Inserisci Webhook URL e messaggio!');
+                return;
+            }
+            
+            // Get selected platforms
+            const platforms = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                platforms.push(cb.value);
+            });
+            
+            // Prepare data for Zapier
+            const zapierData = {
+                message: message,
+                platforms: platforms,
+                timestamp: new Date().toISOString(),
+                source: 'Up to Ten Social Manager',
+                type: 'social_post',
+                metadata: {
+                    generated_by: 'Manual Test',
+                    theme: 'test'
+                }
+            };
+            
+            resultDiv.innerHTML = '<div class="p-4 bg-blue-50 rounded">📤 Invio in corso...</div>';
+            
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(zapierData)
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="p-4 bg-green-50 border border-green-300 rounded">
+                            <p class="text-green-700 font-bold">✅ Inviato con successo a Zapier!</p>
+                            <p class="text-sm text-green-600 mt-2">Controlla il tuo Zap per vedere il risultato.</p>
+                            <details class="mt-3">
+                                <summary class="cursor-pointer text-sm text-gray-600">Dati inviati</summary>
+                                <pre class="mt-2 text-xs bg-white p-2 rounded overflow-x-auto">${JSON.stringify(zapierData, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                    
+                    // Save webhook for future use
+                    localStorage.setItem('uptoten_zapier_webhook', webhookUrl);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-300 rounded">
+                        <p class="text-red-700 font-bold">❌ Errore: ${error.message}</p>
+                        <p class="text-sm text-red-600 mt-2">Verifica che il webhook URL sia corretto.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function saveConfig() {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            if (webhookUrl) {
+                localStorage.setItem('uptoten_zapier_webhook', webhookUrl);
+                alert('✅ Webhook URL salvato!');
+            }
+        }
+    </script>
+</body>
+</html>

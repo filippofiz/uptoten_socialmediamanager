@@ -1,0 +1,42 @@
+# GitHub Pages Configuration
+title: Up to Ten Social Media Manager
+description: AI-powered social media management platform with Zapier integration
+baseurl: "/uptoten_socialmediamanager"
+url: "https://filippofiz.github.io"
+
+# Build settings
+plugins:
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - node_modules
+  - backend/node_modules
+  - frontend/node_modules
+  - package.json
+  - package-lock.json
+  - tsconfig.json
+  - vite.config.ts
+  - README.md
+  - .gitignore
+  - database/
+  - tests/
+  - backend/src/
+  - frontend/src/
+  - '*.ts'
+  - '*.tsx'
+
+# Include specific directories
+include:
+  - _config.yml
+  - index.html
+  - dashboard-zapier.html
+  - generate-token.html
+  - update-token.html
+  - fix-facebook-token.html
+  - zapier-integration.html
+  - all-in-one-dashboard.html
+  - alternative-solutions.html
+  - test-zapier-now.html
+  - zapier-test-cors-fix.html
+  - public/

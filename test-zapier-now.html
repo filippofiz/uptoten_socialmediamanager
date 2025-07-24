@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Test Zapier SUBITO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-2xl font-bold mb-6 text-center">
+                <span class="text-green-600">Up to Ten</span> + 
+                <span class="text-orange-500">Zapier</span>
+            </h1>
+            
+            <div class="bg-green-50 p-4 rounded-lg mb-6">
+                <p class="text-green-800 font-semibold">✅ Webhook configurato e pronto!</p>
+                <p class="text-sm text-green-600">https://hooks.zapier.com/hooks/catch/16844015/uu50wtr/</p>
+            </div>
+
+            <!-- Quick Test -->
+            <div class="space-y-4">
+                <h2 class="text-lg font-bold">🚀 Test Rapido</h2>
+                
+                <button onclick="testNow()" 
+                        class="w-full px-6 py-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-bold text-lg">
+                    ⚡ INVIA TEST A ZAPIER ORA
+                </button>
+                
+                <div id="result"></div>
+            </div>
+
+            <!-- Custom Message -->
+            <div class="mt-8 space-y-4">
+                <h2 class="text-lg font-bold">✏️ Messaggio Personalizzato</h2>
+                
+                <textarea id="customMessage" rows="4" 
+                          class="w-full px-4 py-2 border rounded-lg"
+                          placeholder="Scrivi il tuo messaggio...">🎓 Up to Ten - Centro di eccellenza per ripetizioni a Milano!
+
+Matematica, Fisica, Informatica e tutte le materie STEM spiegate in modo semplice e coinvolgente.
+
+#UpToTen #RipetizioniMilano #STEM #Educazione</textarea>
+                
+                <button onclick="sendCustom()" 
+                        class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
+                    📤 Invia Messaggio Personalizzato
+                </button>
+            </div>
+
+            <!-- Status -->
+            <div class="mt-8 p-4 bg-gray-100 rounded-lg">
+                <h3 class="font-bold mb-2">📊 Cosa succede dopo?</h3>
+                <ol class="list-decimal list-inside text-sm space-y-1">
+                    <li>Zapier riceve il messaggio</li>
+                    <li>Lo distribuisce su Facebook, Instagram, Twitter, LinkedIn</li>
+                    <li>Puoi vedere il risultato nel tuo Zapier Dashboard</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/16844015/uu50wtr/';
+        
+        async function testNow() {
+            const testData = {
+                message: `🧪 Test automatico Up to Ten - ${new Date().toLocaleString('it-IT')}`,
+                platforms: ['facebook', 'instagram', 'twitter', 'linkedin'],
+                hashtags: ['#UpToTen', '#Test', '#Automazione'],
+                metadata: {
+                    theme: 'test',
+                    generatedBy: 'Quick Test',
+                    timestamp: new Date().toISOString(),
+                    brand: 'Up to Ten - Ripetizioni Milano'
+                }
+            };
+            
+            await sendToZapier(testData);
+        }
+        
+        async function sendCustom() {
+            const message = document.getElementById('customMessage').value.trim();
+            if (!message) {
+                alert('Scrivi un messaggio!');
+                return;
+            }
+            
+            const customData = {
+                message: message,
+                platforms: ['facebook', 'instagram', 'twitter', 'linkedin'],
+                hashtags: extractHashtags(message),
+                metadata: {
+                    theme: 'custom',
+                    generatedBy: 'Manual Input',
+                    timestamp: new Date().toISOString(),
+                    brand: 'Up to Ten - Ripetizioni Milano'
+                }
+            };
+            
+            await sendToZapier(customData);
+        }
+        
+        async function sendToZapier(data) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="p-4 bg-blue-50 rounded animate-pulse">📤 Invio in corso...</div>';
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="p-4 bg-green-50 border border-green-300 rounded">
+                            <p class="text-green-700 font-bold">✅ SUCCESSO!</p>
+                            <p class="text-sm text-green-600 mt-2">Messaggio inviato a Zapier!</p>
+                            <p class="text-xs text-gray-600 mt-3">Controlla il tuo Zapier dashboard per vedere l'esecuzione.</p>
+                            <details class="mt-3">
+                                <summary class="cursor-pointer text-sm text-gray-600">Dati inviati</summary>
+                                <pre class="mt-2 text-xs bg-white p-2 rounded overflow-x-auto">${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-300 rounded">
+                        <p class="text-red-700 font-bold">❌ Errore: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function extractHashtags(text) {
+            const matches = text.match(/#\w+/g);
+            return matches || [];
+        }
+    </script>
+</body>
+</html>

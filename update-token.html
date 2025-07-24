@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Aggiorna Token Facebook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h1 class="text-2xl font-bold mb-6">🔐 Aggiorna Token Facebook</h1>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Incolla qui il nuovo Page Access Token:
+                    </label>
+                    <textarea
+                        id="newToken"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        rows="6"
+                        placeholder="EAA..."
+                    ></textarea>
+                </div>
+                
+                <button
+                    onclick="updateToken()"
+                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                    Aggiorna Token
+                </button>
+                
+                <div id="result"></div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-900 mb-2">📝 Come ottenere il token corretto:</h2>
+                <ol class="list-decimal list-inside space-y-2 text-sm text-blue-800">
+                    <li>Vai su <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="underline">Graph API Explorer</a></li>
+                    <li>Seleziona la tua app</li>
+                    <li>Clicca "Get Token" → "Get Page Access Token"</li>
+                    <li>Seleziona TUTTI questi permessi:
+                        <ul class="list-disc list-inside ml-4 mt-1">
+                            <li>pages_manage_posts</li>
+                            <li>pages_read_engagement</li>
+                            <li>pages_show_list</li>
+                        </ul>
+                    </li>
+                    <li>Autorizza e copia il token</li>
+                    <li>Vai su <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" class="underline">Access Token Debugger</a></li>
+                    <li>Incolla il token e clicca "Extend Access Token"</li>
+                    <li>Copia il token esteso e incollalo qui sopra</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateToken() {
+            const newToken = document.getElementById('newToken').value.trim();
+            
+            if (!newToken) {
+                alert('Inserisci il token!');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('uptoten_fb_token', newToken);
+            
+            // Update in the main dashboard
+            if (window.opener) {
+                window.opener.postMessage({ type: 'updateToken', token: newToken }, '*');
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <div class="p-4 bg-green-50 border border-green-200 rounded-md">
+                    <p class="text-green-600">✅ Token aggiornato con successo!</p>
+                    <p class="text-sm text-green-600 mt-1">Puoi chiudere questa finestra e tornare al dashboard.</p>
+                </div>
+            `;
+            
+            // Also update the backend .env file reminder
+            document.getElementById('result').innerHTML += `
+                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <p class="text-yellow-800 font-semibold">📝 Ricorda di aggiornare anche il file backend/.env:</p>
+                    <pre class="text-xs mt-2 bg-gray-100 p-2 rounded overflow-x-auto">FACEBOOK_PAGE_ACCESS_TOKEN=${newToken}</pre>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 166 100% 31%;
+    --secondary: 225 36% 20%;
+  }
+  
+  body {
+    @apply font-sans antialiased;
+  }
+}
