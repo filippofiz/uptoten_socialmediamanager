@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Test Completo AI + Zapier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
+    <style>
+        .uptoten-green { color: #00a666; }
+        .uptoten-blue { color: #1c2545; }
+        .bg-uptoten-green { background-color: #00a666; }
+        .bg-uptoten-blue { background-color: #1c2545; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <h1 class="text-2xl font-bold">
+                    <span class="uptoten-green">Up to Ten</span>
+                    <span class="uptoten-blue">Test Completo</span>
+                </h1>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Test 1: Connessione API -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold mb-4">1️⃣ Test Connessione OpenAI</h2>
+                    <button onclick="testOpenAI()" 
+                            class="w-full px-6 py-3 bg-uptoten-green text-white rounded-lg hover:opacity-90 font-semibold">
+                        🔌 Testa Connessione API
+                    </button>
+                    <div id="openaiResult" class="mt-4"></div>
+                </div>
+                
+                <!-- Test 2: Generazione Contenuto -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold mb-4">2️⃣ Test Generazione Contenuto</h2>
+                    <button onclick="generateContent()" 
+                            class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:opacity-90 font-semibold">
+                        🤖 Genera Contenuto AI
+                    </button>
+                    <div id="contentResult" class="mt-4"></div>
+                </div>
+                
+                <!-- Test 3: Zapier -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold mb-4">3️⃣ Test Invio Zapier</h2>
+                    <button onclick="testZapier()" 
+                            class="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:opacity-90 font-semibold">
+                        📤 Invia Test a Zapier
+                    </button>
+                    <div id="zapierResult" class="mt-4"></div>
+                </div>
+                
+                <!-- Test 4: Flusso Completo -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold mb-4">4️⃣ Test Flusso Completo</h2>
+                    <div class="space-y-3 mb-4">
+                        <select id="theme" class="w-full px-3 py-2 border rounded-lg">
+                            <option value="motivational">💪 Motivazionale</option>
+                            <option value="tips">💡 Consigli Studio</option>
+                            <option value="science">🔬 Curiosità STEM</option>
+                        </select>
+                    </div>
+                    <button onclick="testCompleteFlow()" 
+                            class="w-full px-6 py-3 bg-uptoten-blue text-white rounded-lg hover:opacity-90 font-semibold">
+                        🚀 Test Completo: Genera e Pubblica
+                    </button>
+                    <div id="completeResult" class="mt-4"></div>
+                </div>
+            </div>
+            
+            <!-- Log Area -->
+            <div class="mt-8 bg-white rounded-lg shadow p-6">
+                <h3 class="font-semibold mb-4">📜 Log Attività</h3>
+                <div id="activityLog" class="space-y-2 max-h-96 overflow-y-auto font-mono text-sm">
+                    <p class="text-gray-500">I log appariranno qui...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ZAPIER_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/16844015/uu50wtr/';
+        
+        // Check if API key is configured
+        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.OPENAI_API_KEY || API_CONFIG.OPENAI_API_KEY === 'inserisci-qui-la-tua-chiave-openai') {
+            alert('⚠️ ATTENZIONE: Devi configurare la chiave API OpenAI nel file config.js!');
+        }
+        
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('activityLog');
+            const time = new Date().toLocaleTimeString('it-IT');
+            const colors = {
+                info: 'text-gray-700',
+                success: 'text-green-700',
+                error: 'text-red-700',
+                warning: 'text-yellow-700'
+            };
+            
+            const entry = document.createElement('div');
+            entry.className = `p-2 rounded ${colors[type]} bg-gray-50`;
+            entry.innerHTML = `<span class="text-xs text-gray-500">${time}</span> ${message}`;
+            
+            if (log.children[0]?.textContent.includes('I log appariranno qui')) {
+                log.innerHTML = '';
+            }
+            log.insertBefore(entry, log.firstChild);
+        }
+        
+        // Test 1: OpenAI Connection
+        async function testOpenAI() {
+            const resultDiv = document.getElementById('openaiResult');
+            resultDiv.innerHTML = '<div class="animate-pulse">🔄 Testing...</div>';
+            addLog('Testing connessione OpenAI...', 'info');
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/models', {
+                    headers: {
+                        'Authorization': `Bearer ${API_CONFIG.OPENAI_API_KEY}`
+                    }
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="text-green-600">✅ Connessione OK!</div>';
+                    addLog('Connessione OpenAI riuscita!', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">❌ Errore: ${error.message}</div>`;
+                addLog(`Errore OpenAI: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 2: Content Generation
+        async function generateContent() {
+            const resultDiv = document.getElementById('contentResult');
+            resultDiv.innerHTML = '<div class="animate-pulse">🤖 Generazione in corso...</div>';
+            addLog('Generazione contenuto AI...', 'info');
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_CONFIG.OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{
+                            role: 'system',
+                            content: 'Sei un social media manager per Up to Ten, centro di ripetizioni a Milano. Crea post coinvolgenti in italiano.'
+                        }, {
+                            role: 'user',
+                            content: 'Crea un post motivazionale per studenti con hashtag.'
+                        }],
+                        temperature: 0.7,
+                        max_tokens: 200
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                
+                resultDiv.innerHTML = `
+                    <div class="p-3 bg-green-50 rounded">
+                        <p class="text-sm text-green-800">${content}</p>
+                    </div>
+                `;
+                addLog('Contenuto generato con successo!', 'success');
+                
+                return content;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">❌ Errore: ${error.message}</div>`;
+                addLog(`Errore generazione: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        // Test 3: Zapier
+        async function testZapier() {
+            const resultDiv = document.getElementById('zapierResult');
+            resultDiv.innerHTML = '<div class="animate-pulse">📤 Invio in corso...</div>';
+            addLog('Test invio a Zapier...', 'info');
+            
+            const testData = {
+                message: 'Test da Up to Ten - ' + new Date().toLocaleString('it-IT'),
+                platforms: ['test'],
+                timestamp: new Date().toISOString()
+            };
+            
+            // Use form method
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = ZAPIER_WEBHOOK;
+            form.target = 'zapier_iframe';
+            
+            Object.keys(testData).forEach(key => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = typeof testData[key] === 'object' ? JSON.stringify(testData[key]) : testData[key];
+                form.appendChild(input);
+            });
+            
+            const iframe = document.createElement('iframe');
+            iframe.name = 'zapier_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            document.body.appendChild(form);
+            form.submit();
+            
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+                resultDiv.innerHTML = '<div class="text-green-600">✅ Inviato! Controlla Zapier.</div>';
+                addLog('Test Zapier completato!', 'success');
+            }, 1000);
+        }
+        
+        // Test 4: Complete Flow
+        async function testCompleteFlow() {
+            const resultDiv = document.getElementById('completeResult');
+            const theme = document.getElementById('theme').value;
+            
+            resultDiv.innerHTML = '<div class="animate-pulse">🚀 Esecuzione flusso completo...</div>';
+            addLog('Avvio flusso completo...', 'info');
+            
+            try {
+                // Step 1: Generate content
+                addLog('Step 1: Generazione contenuto...', 'info');
+                const prompt = {
+                    motivational: 'Crea un post motivazionale per studenti che stanno preparando esami.',
+                    tips: 'Crea un post con un consiglio pratico per studiare meglio.',
+                    science: 'Crea un post con una curiosità scientifica interessante per studenti.'
+                };
+                
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_CONFIG.OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{
+                            role: 'system',
+                            content: 'Sei un social media manager per Up to Ten, centro di ripetizioni a Milano. Crea post coinvolgenti in italiano con emoji e hashtag.'
+                        }, {
+                            role: 'user',
+                            content: prompt[theme]
+                        }],
+                        temperature: 0.8,
+                        max_tokens: 250
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Errore generazione contenuto');
+                
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                addLog('Contenuto generato!', 'success');
+                
+                // Step 2: Send to Zapier
+                addLog('Step 2: Invio a Zapier...', 'info');
+                const zapierData = {
+                    message: content,
+                    platforms: ['facebook', 'instagram', 'twitter', 'linkedin'],
+                    theme: theme,
+                    generatedBy: 'Test Completo AI',
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Send using form method
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = ZAPIER_WEBHOOK;
+                form.target = 'zapier_iframe_complete';
+                
+                Object.keys(zapierData).forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = typeof zapierData[key] === 'object' ? JSON.stringify(zapierData[key]) : zapierData[key];
+                    form.appendChild(input);
+                });
+                
+                const iframe = document.createElement('iframe');
+                iframe.name = 'zapier_iframe_complete';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                document.body.appendChild(form);
+                form.submit();
+                
+                setTimeout(() => {
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="p-3 bg-green-50 rounded">
+                                <p class="font-semibold text-green-800">✅ Flusso completato!</p>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded">
+                                <p class="text-sm font-semibold mb-2">Contenuto generato:</p>
+                                <p class="text-sm">${content}</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded">
+                                <p class="text-sm text-blue-700">📤 Inviato a Zapier per distribuzione su tutti i social!</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    addLog('Flusso completo eseguito con successo!', 'success');
+                }, 1500);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">❌ Errore: ${error.message}</div>`;
+                addLog(`Errore flusso completo: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initial check
+        window.onload = function() {
+            if (API_CONFIG.OPENAI_API_KEY && API_CONFIG.OPENAI_API_KEY !== 'inserisci-qui-la-tua-chiave-openai') {
+                addLog('✅ Chiave API configurata', 'success');
+            } else {
+                addLog('⚠️ Chiave API non configurata!', 'warning');
+            }
+            addLog('🚀 Sistema pronto per il test', 'info');
+        }
+    </script>
+</body>
+</html>
