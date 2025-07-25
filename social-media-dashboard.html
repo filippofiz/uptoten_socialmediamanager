@@ -1,0 +1,2732 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up to Ten - Social Media Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .platform-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-2xl font-bold">
+                    <span class="text-green-600">Up to Ten</span>
+                    <span class="text-gray-700">Social Dashboard</span>
+                </h1>
+                <div class="flex items-center gap-4">
+                    <!-- Quota Status -->
+                    <div id="quotaStatus" class="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-sm">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="quotaText">Controllo quota...</span>
+                    </div>
+                    <span id="connectionStatus" class="text-sm">
+                        <i class="fas fa-circle text-green-500"></i> Online
+                    </span>
+                    <button onclick="location.reload()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Post Oggi</p>
+                        <p class="text-2xl font-bold" id="todayPosts">0</p>
+                    </div>
+                    <i class="fas fa-paper-plane text-3xl text-blue-500"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Programmati</p>
+                        <p class="text-2xl font-bold" id="scheduledPosts">0</p>
+                    </div>
+                    <i class="fas fa-calendar-alt text-3xl text-purple-500"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Engagement</p>
+                        <p class="text-2xl font-bold" id="totalEngagement">0</p>
+                    </div>
+                    <i class="fas fa-heart text-3xl text-red-500"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">AI Debates Usati</p>
+                        <p class="text-2xl font-bold" id="aiDebatesUsed">0</p>
+                    </div>
+                    <i class="fas fa-comments text-3xl text-amber-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="bg-white rounded-t-lg shadow">
+            <nav class="flex space-x-1 p-1">
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('create')" data-tab="create">
+                    <i class="fas fa-plus-circle mr-2"></i>Crea Post
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('ai')" data-tab="ai">
+                    <i class="fas fa-magic mr-2"></i>AI Generator
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('graphics')" data-tab="graphics">
+                    <i class="fas fa-image mr-2"></i>Grafiche
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('schedule')" data-tab="schedule">
+                    <i class="fas fa-calendar mr-2"></i>Calendario
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('analytics')" data-tab="analytics">
+                    <i class="fas fa-chart-line mr-2"></i>Analytics
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('training')" data-tab="training">
+                    <i class="fas fa-brain mr-2"></i>AI Training
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-lg text-center font-medium transition-colors" 
+                        onclick="switchTab('settings')" data-tab="settings">
+                    <i class="fas fa-cog mr-2"></i>Impostazioni
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="bg-white rounded-b-lg shadow">
+            <!-- Create Post Tab -->
+            <div id="create-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">Crea Nuovo Post</h2>
+                
+                <form id="createPostForm" class="space-y-6">
+                    <!-- Content -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Contenuto</label>
+                        <textarea id="postContent" rows="5" class="w-full p-3 border rounded-lg resize-none"
+                                  placeholder="Scrivi il tuo post qui..."></textarea>
+                        <div class="mt-2 flex justify-between text-sm text-gray-600">
+                            <span id="charCount">0 caratteri</span>
+                            <div class="space-x-4">
+                                <button type="button" onclick="addEmoji('😊')" class="hover:text-gray-900">😊</button>
+                                <button type="button" onclick="addEmoji('🚀')" class="hover:text-gray-900">🚀</button>
+                                <button type="button" onclick="addEmoji('💡')" class="hover:text-gray-900">💡</button>
+                                <button type="button" onclick="addEmoji('🎯')" class="hover:text-gray-900">🎯</button>
+                                <button type="button" onclick="addEmoji('✨')" class="hover:text-gray-900">✨</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platforms -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Piattaforme</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label class="platform-select relative">
+                                <input type="checkbox" name="platforms" value="facebook" checked class="peer sr-only">
+                                <div class="p-4 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50">
+                                    <i class="fab fa-facebook text-2xl text-blue-600"></i>
+                                    <p class="text-sm mt-1">Facebook</p>
+                                </div>
+                            </label>
+                            <label class="platform-select relative">
+                                <input type="checkbox" name="platforms" value="instagram" class="peer sr-only">
+                                <div class="p-4 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50">
+                                    <i class="fab fa-instagram text-2xl text-purple-600"></i>
+                                    <p class="text-sm mt-1">Instagram</p>
+                                </div>
+                            </label>
+                            <label class="platform-select relative">
+                                <input type="checkbox" name="platforms" value="twitter" class="peer sr-only">
+                                <div class="p-4 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-sky-500 peer-checked:bg-sky-50">
+                                    <i class="fab fa-twitter text-2xl text-sky-500"></i>
+                                    <p class="text-sm mt-1">Twitter</p>
+                                </div>
+                            </label>
+                            <label class="platform-select relative">
+                                <input type="checkbox" name="platforms" value="linkedin" class="peer sr-only">
+                                <div class="p-4 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-blue-700 peer-checked:bg-blue-50">
+                                    <i class="fab fa-linkedin text-2xl text-blue-700"></i>
+                                    <p class="text-sm mt-1">LinkedIn</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Media -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Media</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Link</label>
+                                <input type="url" id="postLink" class="w-full p-3 border rounded-lg" 
+                                       placeholder="https://example.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">URL Immagine</label>
+                                <input type="url" id="postImage" class="w-full p-3 border rounded-lg" 
+                                       placeholder="https://example.com/image.jpg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hashtags -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Hashtags</label>
+                        <input type="text" id="postHashtags" class="w-full p-3 border rounded-lg" 
+                               placeholder="#socialmedia #marketing #business">
+                        <p class="text-xs text-gray-600 mt-1">Separati da spazio</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-4">
+                        <button type="button" onclick="publishNow()" 
+                                class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium">
+                            <i class="fas fa-paper-plane mr-2"></i>Pubblica Ora
+                        </button>
+                        <button type="button" onclick="schedulePost()" 
+                                class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-medium">
+                            <i class="fas fa-clock mr-2"></i>Programma
+                        </button>
+                        <button type="button" onclick="saveDraft()" 
+                                class="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 font-medium">
+                            <i class="fas fa-save mr-2"></i>Salva Bozza
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- AI Generator Tab -->
+            <div id="ai-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">Generatore Contenuti AI</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- AI Form -->
+                    <div>
+                        <form id="aiForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Argomento</label>
+                                <input type="text" id="aiTopic" class="w-full p-3 border rounded-lg" 
+                                       placeholder="Es: Consigli di marketing digitale">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Tono</label>
+                                <select id="aiTone" class="w-full p-3 border rounded-lg">
+                                    <option value="professional">Professionale</option>
+                                    <option value="casual">Informale</option>
+                                    <option value="inspirational">Motivazionale</option>
+                                    <option value="educational">Educativo</option>
+                                    <option value="humorous">Divertente</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Platform Selection -->
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Piattaforme</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" value="facebook" class="mr-2 ai-platform-checkbox" checked>
+                                        <i class="fab fa-facebook text-blue-600 mr-2"></i>Facebook
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" value="instagram" class="mr-2 ai-platform-checkbox" checked>
+                                        <i class="fab fa-instagram text-pink-600 mr-2"></i>Instagram
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" value="twitter" class="mr-2 ai-platform-checkbox" checked>
+                                        <i class="fab fa-twitter text-blue-400 mr-2"></i>Twitter
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" value="linkedin" class="mr-2 ai-platform-checkbox" checked>
+                                        <i class="fab fa-linkedin text-blue-700 mr-2"></i>LinkedIn
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Tipo di Contenuto</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" onclick="setContentType('tips')" 
+                                            class="content-type-btn p-3 border rounded-lg hover:bg-gray-50">
+                                        💡 Tips
+                                    </button>
+                                    <button type="button" onclick="setContentType('news')" 
+                                            class="content-type-btn p-3 border rounded-lg hover:bg-gray-50">
+                                        📰 News
+                                    </button>
+                                    <button type="button" onclick="setContentType('promo')" 
+                                            class="content-type-btn p-3 border rounded-lg hover:bg-gray-50">
+                                        🎁 Promo
+                                    </button>
+                                    <button type="button" onclick="setContentType('story')" 
+                                            class="content-type-btn p-3 border rounded-lg hover:bg-gray-50">
+                                        📖 Storia
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Lunghezza</label>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="setLength('short')" 
+                                            class="length-btn flex-1 p-2 border rounded-lg hover:bg-gray-50">
+                                        Breve
+                                    </button>
+                                    <button type="button" onclick="setLength('medium')" 
+                                            class="length-btn flex-1 p-2 border rounded-lg hover:bg-gray-50 bg-blue-50 border-blue-500">
+                                        Media
+                                    </button>
+                                    <button type="button" onclick="setLength('long')" 
+                                            class="length-btn flex-1 p-2 border rounded-lg hover:bg-gray-50">
+                                        Lunga
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- AI Debate Toggle -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <div>
+                                        <span class="font-medium text-amber-900">🤖 Usa AI Debate</span>
+                                        <p class="text-sm text-amber-700 mt-1">
+                                            Claude e GPT-4 collaborano per creare il post perfetto
+                                        </p>
+                                    </div>
+                                    <input type="checkbox" id="useAIDebate" class="w-5 h-5">
+                                </label>
+                            </div>
+
+                            <button type="button" onclick="generateAIContent()" 
+                                    class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg hover:opacity-90 font-medium">
+                                <i class="fas fa-magic mr-2"></i>Genera Contenuto
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- AI Results -->
+                    <div>
+                        <div id="aiResults" class="space-y-4">
+                            <div class="text-center text-gray-500 py-12">
+                                <i class="fas fa-robot text-6xl mb-4"></i>
+                                <p>I contenuti generati appariranno qui</p>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Debate Transcript -->
+                        <div id="debateTranscript" class="hidden mt-4">
+                            <h4 class="font-medium mb-2 flex items-center">
+                                <i class="fas fa-comments text-amber-500 mr-2"></i>
+                                Trascrizione Dibattito AI
+                            </h4>
+                            <div id="debateContent" class="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto text-sm space-y-2">
+                                <!-- Debate transcript will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Templates -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold mb-4">Template Rapidi</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="useAITemplate('motivational-monday')" 
+                                class="p-4 border rounded-lg hover:bg-gray-50 text-left">
+                            <i class="fas fa-sun text-yellow-500 mb-2"></i>
+                            <p class="font-medium">Lunedì Motivazionale</p>
+                            <p class="text-sm text-gray-600">Inizia la settimana</p>
+                        </button>
+                        <button onclick="useAITemplate('tip-tuesday')" 
+                                class="p-4 border rounded-lg hover:bg-gray-50 text-left">
+                            <i class="fas fa-lightbulb text-blue-500 mb-2"></i>
+                            <p class="font-medium">Tip Tuesday</p>
+                            <p class="text-sm text-gray-600">Consigli utili</p>
+                        </button>
+                        <button onclick="useAITemplate('wisdom-wednesday')" 
+                                class="p-4 border rounded-lg hover:bg-gray-50 text-left">
+                            <i class="fas fa-brain text-purple-500 mb-2"></i>
+                            <p class="font-medium">Wisdom Wednesday</p>
+                            <p class="text-sm text-gray-600">Condividi saggezza</p>
+                        </button>
+                        <button onclick="useAITemplate('throwback-thursday')" 
+                                class="p-4 border rounded-lg hover:bg-gray-50 text-left">
+                            <i class="fas fa-history text-green-500 mb-2"></i>
+                            <p class="font-medium">Throwback Thursday</p>
+                            <p class="text-sm text-gray-600">Storie di successo</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Tab -->
+            <div id="schedule-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">Calendario Editoriale</h2>
+                
+                <!-- Calendar Controls -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <button onclick="previousWeek()" class="p-2 hover:bg-gray-100 rounded">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 class="text-lg font-medium" id="currentWeek">Questa Settimana</h3>
+                        <button onclick="nextWeek()" class="p-2 hover:bg-gray-100 rounded">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openScheduleModal()" 
+                                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                            <i class="fas fa-plus mr-2"></i>Programma Post
+                        </button>
+                        <button onclick="generateEditorialPlan()" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                            <i class="fas fa-magic mr-2"></i>Genera Piano AI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="grid grid-cols-7 gap-2">
+                    <!-- Days Header -->
+                    <div class="text-center font-medium text-gray-600 py-2">Lun</div>
+                    <div class="text-center font-medium text-gray-600 py-2">Mar</div>
+                    <div class="text-center font-medium text-gray-600 py-2">Mer</div>
+                    <div class="text-center font-medium text-gray-600 py-2">Gio</div>
+                    <div class="text-center font-medium text-gray-600 py-2">Ven</div>
+                    <div class="text-center font-medium text-gray-600 py-2">Sab</div>
+                    <div class="text-center font-medium text-gray-600 py-2">Dom</div>
+                    
+                    <!-- Calendar Days -->
+                    <div id="calendarGrid" class="col-span-7 grid grid-cols-7 gap-2">
+                        <!-- Calendar days will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Scheduled Posts List -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold mb-4">Post Programmati</h3>
+                    <div id="scheduledList" class="space-y-3">
+                        <!-- Scheduled posts will be listed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">Analytics & Performance</h2>
+                
+                <!-- Date Range Selector -->
+                <div class="flex items-center gap-4 mb-6">
+                    <select id="analyticsRange" onchange="updateAnalytics()" class="p-2 border rounded-lg">
+                        <option value="today">Oggi</option>
+                        <option value="week" selected>Ultima Settimana</option>
+                        <option value="month">Ultimo Mese</option>
+                        <option value="quarter">Ultimi 3 Mesi</option>
+                    </select>
+                </div>
+
+                <!-- Performance Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                        <h3 class="text-lg font-medium mb-2">Reach Totale</h3>
+                        <p class="text-3xl font-bold" id="totalReach">0</p>
+                        <p class="text-sm opacity-90 mt-1">+0% vs periodo precedente</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white">
+                        <h3 class="text-lg font-medium mb-2">Engagement Rate</h3>
+                        <p class="text-3xl font-bold" id="engagementRate">0%</p>
+                        <p class="text-sm opacity-90 mt-1">+0% vs periodo precedente</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white">
+                        <h3 class="text-lg font-medium mb-2">Click Rate</h3>
+                        <p class="text-3xl font-bold" id="clickRate">0%</p>
+                        <p class="text-sm opacity-90 mt-1">+0% vs periodo precedente</p>
+                    </div>
+                </div>
+
+                <!-- Platform Breakdown -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Performance per Piattaforma</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fab fa-facebook text-blue-600 text-xl"></i>
+                                <span>Facebook</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm text-gray-600">12 post</span>
+                                <span class="font-medium">2.3K reach</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fab fa-instagram text-purple-600 text-xl"></i>
+                                <span>Instagram</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm text-gray-600">8 post</span>
+                                <span class="font-medium">1.8K reach</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fab fa-twitter text-sky-500 text-xl"></i>
+                                <span>Twitter</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm text-gray-600">15 post</span>
+                                <span class="font-medium">950 reach</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fab fa-linkedin text-blue-700 text-xl"></i>
+                                <span>LinkedIn</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm text-gray-600">5 post</span>
+                                <span class="font-medium">1.2K reach</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Posts -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Top Performing Posts</h3>
+                    <div id="topPosts" class="space-y-3">
+                        <!-- Top posts will be listed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Training Tab -->
+            <div id="training-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">AI Training & Insights</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Training Status -->
+                    <div class="bg-white rounded-lg border p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-graduation-cap text-purple-500 mr-2"></i>
+                            Stato Training
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Post Analizzati</span>
+                                <span class="font-bold" id="analyzedPosts">0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Miglioramento Performance</span>
+                                <span class="font-bold text-green-600" id="performanceImprovement">+0%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Ultimo Training</span>
+                                <span class="text-sm" id="lastTraining">Mai</span>
+                            </div>
+                            <button onclick="startTraining()" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-play mr-2"></i>Avvia Training
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Preferences -->
+                    <div class="bg-white rounded-lg border p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-sliders-h text-blue-500 mr-2"></i>
+                            Preferenze AI
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-600">Tono Preferito</label>
+                                <div class="flex gap-2 mt-1" id="preferredTones">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">Professionale</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">Amichevole</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Emoji Usage</label>
+                                <div class="mt-1">
+                                    <span class="text-sm font-medium" id="emojiUsage">Medio</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Hashtag Preferiti</label>
+                                <div class="flex flex-wrap gap-1 mt-1" id="preferredHashtags">
+                                    <!-- Hashtags will be displayed here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Insights -->
+                <div class="mt-6 bg-white rounded-lg border p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                        Performance Insights
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Top Performing Content -->
+                        <div>
+                            <h4 class="font-medium mb-3">🏆 Top Performing Posts</h4>
+                            <div id="topPerformingPosts" class="space-y-2">
+                                <p class="text-gray-500 text-sm">Nessun dato disponibile</p>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Recommendations -->
+                        <div>
+                            <h4 class="font-medium mb-3">💡 Raccomandazioni AI</h4>
+                            <div id="aiRecommendations" class="space-y-2">
+                                <p class="text-gray-500 text-sm">Avvia il training per ricevere suggerimenti</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debate History -->
+                <div class="mt-6 bg-white rounded-lg border p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fas fa-comments text-amber-500 mr-2"></i>
+                        Storico Dibattiti AI
+                    </h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-sm text-gray-600">
+                            I dibattiti AI migliorano la qualità dei contenuti del <span class="font-bold text-green-600" id="debateImprovement">0%</span>
+                        </p>
+                        <button onclick="loadDebateHistory()" class="text-blue-600 hover:text-blue-700 text-sm">
+                            <i class="fas fa-sync mr-1"></i>Aggiorna
+                        </button>
+                    </div>
+                    <div id="debateHistory" class="space-y-3">
+                        <!-- Debate history will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Feedback Section -->
+                <div class="mt-6 bg-amber-50 rounded-lg border border-amber-200 p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center text-amber-900">
+                        <i class="fas fa-comment-dots mr-2"></i>
+                        Feedback Rapido
+                    </h3>
+                    <p class="text-sm text-amber-700 mb-4">
+                        Il tuo feedback aiuta l'AI a migliorare continuamente
+                    </p>
+                    <div class="flex gap-2">
+                        <button onclick="quickFeedback('excellent')" class="flex-1 py-2 bg-white border border-amber-300 rounded-lg hover:bg-amber-100">
+                            😍 Eccellente
+                        </button>
+                        <button onclick="quickFeedback('good')" class="flex-1 py-2 bg-white border border-amber-300 rounded-lg hover:bg-amber-100">
+                            😊 Buono
+                        </button>
+                        <button onclick="quickFeedback('poor')" class="flex-1 py-2 bg-white border border-amber-300 rounded-lg hover:bg-amber-100">
+                            😕 Migliorabile
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphics Tab -->
+            <div id="graphics-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">Gestione Grafiche e Brand Assets</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Upload Logo Section -->
+                    <div class="bg-white rounded-lg border p-6">
+                        <h3 class="text-lg font-semibold mb-4">
+                            <i class="fas fa-upload mr-2 text-blue-600"></i>Logo Aziendale
+                        </h3>
+                        <div class="space-y-4">
+                            <div id="logoPreview" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                <i class="fas fa-image text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Nessun logo caricato</p>
+                            </div>
+                            <input type="file" id="logoUpload" accept="image/*" class="hidden">
+                            <button type="button" id="logoUploadBtn"
+                                    class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-upload mr-2"></i>Carica Logo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Platform Templates -->
+                    <div class="bg-white rounded-lg border p-6">
+                        <h3 class="text-lg font-semibold mb-4">
+                            <i class="fas fa-palette mr-2 text-purple-600"></i>Template per Piattaforma
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="selectTemplateForUpload('facebook')" 
+                                        class="template-btn p-3 border rounded-lg hover:bg-blue-50 text-center">
+                                    <i class="fab fa-facebook text-blue-600 text-2xl mb-1"></i>
+                                    <p class="text-sm">Facebook</p>
+                                </button>
+                                <button type="button" onclick="selectTemplateForUpload('instagram')" 
+                                        class="template-btn p-3 border rounded-lg hover:bg-pink-50 text-center">
+                                    <i class="fab fa-instagram text-pink-600 text-2xl mb-1"></i>
+                                    <p class="text-sm">Instagram</p>
+                                </button>
+                                <button type="button" onclick="selectTemplateForUpload('twitter')" 
+                                        class="template-btn p-3 border rounded-lg hover:bg-blue-50 text-center">
+                                    <i class="fab fa-twitter text-blue-400 text-2xl mb-1"></i>
+                                    <p class="text-sm">Twitter</p>
+                                </button>
+                                <button type="button" onclick="selectTemplateForUpload('linkedin')" 
+                                        class="template-btn p-3 border rounded-lg hover:bg-blue-50 text-center">
+                                    <i class="fab fa-linkedin text-blue-700 text-2xl mb-1"></i>
+                                    <p class="text-sm">LinkedIn</p>
+                                </button>
+                            </div>
+                            <input type="file" id="templateUpload" accept="image/*" class="hidden" onchange="uploadTemplate(event)">
+                            <div id="selectedPlatform" class="hidden">
+                                <p class="text-sm text-gray-600">Piattaforma selezionata: <span id="platformName" class="font-semibold"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Current Brand Assets -->
+                <div class="mt-8 bg-white rounded-lg border p-6">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-images mr-2 text-green-600"></i>Assets Correnti
+                    </h3>
+                    <div id="currentAssets" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Assets will be loaded here -->
+                        <div class="text-center text-gray-500 col-span-full py-8">
+                            <i class="fas fa-folder-open text-4xl mb-2"></i>
+                            <p>Nessun asset caricato</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Auto-Composition Settings -->
+                <div class="mt-8 bg-white rounded-lg border p-6">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-cog mr-2 text-gray-600"></i>Impostazioni Composizione Automatica
+                    </h3>
+                    <div class="space-y-4">
+                        <label class="flex items-center justify-between">
+                            <span class="text-gray-700">Applica automaticamente logo alle immagini generate</span>
+                            <input type="checkbox" id="autoApplyLogo" checked class="w-5 h-5" onchange="saveCompositionSettings()">
+                        </label>
+                        <label class="flex items-center justify-between">
+                            <span class="text-gray-700">Usa template per piattaforma quando disponibili</span>
+                            <input type="checkbox" id="autoApplyTemplate" checked class="w-5 h-5" onchange="saveCompositionSettings()">
+                        </label>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Posizione Logo Default</label>
+                            <select id="logoPosition" class="w-full p-2 border rounded-lg" onchange="saveCompositionSettings()">
+                                <option value="top-left">In Alto a Sinistra</option>
+                                <option value="top-right">In Alto a Destra</option>
+                                <option value="bottom-left">In Basso a Sinistra</option>
+                                <option value="bottom-right" selected>In Basso a Destra</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content p-6">
+                <h2 class="text-xl font-bold mb-6">Impostazioni</h2>
+                
+                <div class="max-w-2xl space-y-6">
+                    <!-- Auto Scheduling -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4">Pubblicazione Automatica</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium">Abilita Scheduler Automatico</p>
+                                    <p class="text-sm text-gray-600">Pubblica automaticamente i post programmati</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="autoScheduler" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Frequenza Post</label>
+                                <select id="postFrequency" class="w-full p-2 border rounded-lg">
+                                    <option value="2">Ogni 2 ore</option>
+                                    <option value="4" selected>Ogni 4 ore</option>
+                                    <option value="6">Ogni 6 ore</option>
+                                    <option value="8">Ogni 8 ore</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Orari Attivi</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="time" id="startTime" value="08:00" class="p-2 border rounded-lg">
+                                    <input type="time" id="endTime" value="22:00" class="p-2 border rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platform Settings -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4">Piattaforme Default</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="defaultFacebook" checked class="mr-3">
+                                <i class="fab fa-facebook text-blue-600 mr-2"></i>
+                                Facebook
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="defaultInstagram" checked class="mr-3">
+                                <i class="fab fa-instagram text-purple-600 mr-2"></i>
+                                Instagram
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="defaultTwitter" checked class="mr-3">
+                                <i class="fab fa-twitter text-sky-500 mr-2"></i>
+                                Twitter
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="defaultLinkedin" class="mr-3">
+                                <i class="fab fa-linkedin text-blue-700 mr-2"></i>
+                                LinkedIn
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Company Context Settings -->
+                    <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-building mr-2 text-blue-600"></i>
+                            Contesto Aziendale
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Nome Azienda</label>
+                                <input type="text" id="companyName" 
+                                       placeholder="Es: Up To Ten" 
+                                       class="w-full p-2 border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Settore/Industry</label>
+                                <input type="text" id="companyIndustry" 
+                                       placeholder="Es: Marketing Digitale, E-commerce, Consulenza" 
+                                       class="w-full p-2 border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Descrizione Azienda</label>
+                                <textarea id="companyDescription" 
+                                          placeholder="Descrivi brevemente cosa fa la tua azienda, i suoi valori e la sua missione..." 
+                                          class="w-full p-2 border rounded-lg h-24"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Target Audience</label>
+                                <input type="text" id="targetAudience" 
+                                       placeholder="Es: Imprenditori, PMI, Professionisti del marketing" 
+                                       class="w-full p-2 border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Valori e Tone of Voice</label>
+                                <textarea id="brandVoice" 
+                                          placeholder="Es: Professionale ma amichevole, innovativo, orientato ai risultati..." 
+                                          class="w-full p-2 border rounded-lg h-20"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Obiettivi di Business</label>
+                                <input type="text" id="businessGoals" 
+                                       placeholder="Es: Aumentare brand awareness, generare lead, educare il mercato" 
+                                       class="w-full p-2 border rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Settings -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4">Impostazioni AI</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Tono Default</label>
+                                <select id="defaultTone" class="w-full p-2 border rounded-lg">
+                                    <option value="professional">Professionale</option>
+                                    <option value="casual">Informale</option>
+                                    <option value="inspirational">Motivazionale</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Hashtags Automatici</label>
+                                <input type="text" id="defaultHashtags" 
+                                       value="#uptoTen #socialMedia #milano" 
+                                       class="w-full p-2 border rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="saveSettings()" 
+                            class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium">
+                        <i class="fas fa-save mr-2"></i>Salva Impostazioni
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- AI Debate Modal -->
+    <div id="debateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fas fa-robot text-purple-600"></i>
+                        Dibattito AI: Claude vs GPT-4
+                    </h3>
+                    <button onclick="closeDebateModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="debateContent" class="space-y-4">
+                    <!-- Debate rounds will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Schedule Modal -->
+    <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <h3 class="text-lg font-bold mb-4">Programma Post</h3>
+                <form id="scheduleForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Data</label>
+                        <input type="date" id="scheduleDate" class="w-full p-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Ora</label>
+                        <input type="time" id="scheduleTime" class="w-full p-2 border rounded-lg" required>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">
+                            Conferma
+                        </button>
+                        <button type="button" onclick="closeScheduleModal()" 
+                                class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                            Annulla
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed bottom-4 right-4 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-4 flex items-center gap-3">
+            <i id="notificationIcon" class="fas fa-check-circle text-green-500 text-xl"></i>
+            <div>
+                <p id="notificationText" class="font-medium">Operazione completata</p>
+                <p id="notificationDetail" class="text-sm text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let currentTab = 'create';
+        let selectedContentType = 'tips';
+        let selectedLength = 'medium';
+        let scheduledPosts = [];
+        let selectedPlatforms = ['facebook', 'instagram', 'twitter', 'linkedin'];
+        
+        // Update selected platforms when checkboxes change
+        function updateSelectedPlatforms() {
+            selectedPlatforms = Array.from(document.querySelectorAll('.ai-platform-checkbox:checked')).map(cb => cb.value);
+        }
+        
+        // Use generated content function
+        function useGeneratedContent() {
+            if (!window.generatedContent) return;
+            
+            const content = window.generatedContent;
+            const images = window.generatedImages;
+            
+            // Check if content is platform-specific
+            if (typeof content === 'object' && (content.Facebook || content.Instagram || content.Twitter || content.LinkedIn)) {
+                // Get first platform's content for the main textarea
+                const firstPlatform = selectedPlatforms[0];
+                const platformKey = firstPlatform === 'linkedin' ? 'LinkedIn' : firstPlatform.charAt(0).toUpperCase() + firstPlatform.slice(1);
+                const platformContent = content[platformKey];
+                
+                if (platformContent) {
+                    document.getElementById('postContent').value = platformContent.main_content_text || platformContent.content || '';
+                    document.getElementById('postHashtags').value = platformContent.relevant_hashtags || platformContent.hashtags || '';
+                }
+            } else if (typeof content === 'object' && content.imagePrompt) {
+                // New format with imagePrompt and platform content
+                const firstPlatform = selectedPlatforms[0];
+                const platformContent = content[firstPlatform];
+                
+                if (platformContent && typeof platformContent === 'object') {
+                    document.getElementById('postContent').value = platformContent.content || '';
+                    document.getElementById('postHashtags').value = (platformContent.hashtags || []).join(' ');
+                }
+            } else if (typeof content === 'object' && content.content) {
+                document.getElementById('postContent').value = content.content;
+                document.getElementById('postHashtags').value = (content.hashtags || []).join(' ');
+            } else if (typeof content === 'string') {
+                document.getElementById('postContent').value = content;
+            }
+            
+            // Store generated images globally for later use
+            if (images && Object.keys(images).length > 0) {
+                window.currentGeneratedImages = images;
+                
+                // Show image preview in create tab
+                const firstPlatform = selectedPlatforms[0] || 'facebook';
+                if (images[firstPlatform]) {
+                    showNotification('info', 'Immagine Generata', 'Le immagini sono pronte per ogni piattaforma');
+                }
+            }
+            
+            switchTab('create');
+            updateCharCount();
+            showNotification('success', 'Contenuto Importato', 'Pronto per la pubblicazione');
+        }
+
+        // Brand Assets Management
+        let selectedPlatformForTemplate = null;
+        let isUploading = false;
+        
+        async function uploadLogo(event) {
+            console.log('=== UPLOAD LOGO START ===');
+            console.log('Event type:', event.type);
+            console.log('Event target:', event.target);
+            window.BLOCK_ALL_NAVIGATION = true;
+            
+            try {
+                event.preventDefault();
+                event.stopPropagation();
+            } catch (e) {
+                console.error('Error preventing default:', e);
+            }
+            
+            // Prevent multiple uploads
+            if (isUploading) {
+                console.log('Upload already in progress');
+                return;
+            }
+            
+            const file = event.target.files[0];
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
+            
+            console.log('File selected:', file.name, 'Size:', file.size);
+            isUploading = true;
+            window.isUploading = true; // Make it global
+            
+            // Add a visible indicator
+            const uploadBtn = document.getElementById('logoUploadBtn');
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Caricamento...';
+            }
+            
+            const formData = new FormData();
+            formData.append('logo', file);
+            
+            try {
+                showLoader('Caricamento logo...');
+                const response = await fetch(`${API_URL}/api/brand/upload-logo`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                hideLoader();
+                
+                console.log('Response received:', result);
+                
+                if (result.success) {
+                    console.log('Upload successful, updating UI...');
+                    console.log('Current tab before UI update:', currentTab);
+                    
+                    // Update preview
+                    const logoPreview = document.getElementById('logoPreview');
+                    if (logoPreview) {
+                        console.log('Updating logo preview...');
+                        logoPreview.innerHTML = `<img src="${result.url}" alt="Logo" class="max-h-32 mx-auto">`;
+                        console.log('Logo preview updated');
+                    }
+                    
+                    // Reset file input
+                    const logoUploadInput = document.getElementById('logoUpload');
+                    if (logoUploadInput) {
+                        console.log('Resetting file input...');
+                        // Remove the event listener temporarily to avoid re-triggering
+                        logoUploadInput.removeEventListener('change', uploadLogo);
+                        logoUploadInput.value = '';
+                        // Re-add the event listener after a short delay
+                        setTimeout(() => {
+                            logoUploadInput.addEventListener('change', uploadLogo);
+                            console.log('Event listener re-added');
+                        }, 100);
+                    }
+                    
+                    console.log('Calling loadBrandAssets...');
+                    console.log('BEFORE loadBrandAssets - current tab:', currentTab);
+                    
+                    // Set a flag to prevent navigation during asset reload
+                    window.blockNavigation = true;
+                    
+                    loadBrandAssets().then(() => {
+                        console.log('Assets reloaded successfully');
+                        console.log('AFTER loadBrandAssets - current tab:', currentTab);
+                        // Reset the flags after assets are loaded
+                        window.isUploading = false;
+                        window.blockNavigation = false;
+                        window.BLOCK_ALL_NAVIGATION = false;
+                    }).catch(err => {
+                        console.error('Error reloading assets:', err);
+                        window.isUploading = false;
+                        window.blockNavigation = false;
+                    });
+                    
+                    showNotification('success', 'Logo Caricato', 'Logo caricato con successo');
+                    console.log('=== UPLOAD LOGO COMPLETE ===');
+                } else {
+                    console.error('Upload failed:', result.error);
+                    showNotification('error', 'Errore Upload', result.error || 'Errore nel caricamento');
+                    window.isUploading = false;
+                    window.blockNavigation = false;
+                    window.BLOCK_ALL_NAVIGATION = false;
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                hideLoader();
+                showNotification('error', 'Errore Upload', error.message);
+                window.isUploading = false;
+                window.blockNavigation = false;
+            } finally {
+                console.log('Upload finally block executed');
+                console.log('Current tab in finally:', currentTab);
+                
+                // Don't reset isUploading here - it's reset after loadBrandAssets completes
+                // isUploading = false;
+                
+                // Reset button
+                const uploadBtn = document.getElementById('logoUploadBtn');
+                if (uploadBtn) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Carica Logo';
+                }
+                
+                console.log('Finally block completed');
+            }
+        }
+        
+        function selectTemplateForUpload(platform) {
+            selectedPlatformForTemplate = platform;
+            document.getElementById('selectedPlatform').classList.remove('hidden');
+            document.getElementById('platformName').textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
+            document.getElementById('templateUpload').click();
+        }
+        
+        async function uploadTemplate(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const file = event.target.files[0];
+            if (!file || !selectedPlatformForTemplate) return;
+            
+            const formData = new FormData();
+            formData.append('template', file);
+            formData.append('platform', selectedPlatformForTemplate);
+            
+            try {
+                showLoader(`Caricamento template ${selectedPlatformForTemplate}...`);
+                const response = await fetch(`${API_URL}/api/brand/upload-template`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                hideLoader();
+                
+                if (result.success) {
+                    showNotification('success', 'Template Caricato', `Template per ${selectedPlatformForTemplate} salvato`);
+                    // Reset file input
+                    document.getElementById('templateUpload').value = '';
+                    selectedPlatformForTemplate = null;
+                    // Reload assets without changing tab
+                    loadBrandAssets();
+                } else {
+                    showNotification('error', 'Errore', result.error);
+                }
+            } catch (error) {
+                hideLoader();
+                showNotification('error', 'Errore', error.message);
+            }
+        }
+        
+        async function deleteAsset(assetId) {
+            if (!confirm('Sei sicuro di voler eliminare questo asset?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/brand/assets/${assetId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showNotification('success', 'Asset Eliminato', 'L\'asset è stato rimosso');
+                    loadBrandAssets();
+                } else {
+                    showNotification('error', 'Errore', 'Impossibile eliminare l\'asset');
+                }
+            } catch (error) {
+                showNotification('error', 'Errore', error.message);
+            }
+        }
+        
+        async function saveCompositionSettings() {
+            try {
+                // Check if elements exist before accessing
+                const autoApplyLogo = document.getElementById('autoApplyLogo');
+                const autoApplyTemplate = document.getElementById('autoApplyTemplate');
+                const logoPosition = document.getElementById('logoPosition');
+                
+                if (!autoApplyLogo || !autoApplyTemplate || !logoPosition) {
+                    console.log('Composition settings elements not found');
+                    return;
+                }
+                
+                const settings = {
+                    auto_apply_logo: autoApplyLogo.checked,
+                    auto_apply_template: autoApplyTemplate.checked,
+                    logo_position: logoPosition.value
+                };
+                
+                const response = await fetch(`${API_URL}/api/brand/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    // Don't show notification on every change, it's annoying
+                    console.log('Composition settings saved');
+                }
+            } catch (error) {
+                console.error('Error saving composition settings:', error);
+            }
+        }
+        
+        async function loadBrandAssets() {
+            console.log('=== LOAD BRAND ASSETS START ===');
+            console.log('Current tab before load:', currentTab);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/brand/assets`);
+                const result = await response.json();
+                
+                console.log('Brand assets response:', result);
+                
+                if (result.success && result.assets) {
+                    // Find logo
+                    const logo = result.assets.find(asset => asset.type === 'logo');
+                    if (logo) {
+                        document.getElementById('logoPreview').innerHTML = `
+                            <img src="${logo.file_url}" alt="Logo" class="max-h-32 mx-auto">
+                        `;
+                    }
+                    
+                    // Show all assets
+                    if (result.assets.length > 0) {
+                        const assetsHtml = result.assets.map(asset => {
+                            if (asset.type === 'logo') {
+                                return `
+                                    <div class="text-center relative">
+                                        <img src="${asset.file_url}" 
+                                             alt="Logo" 
+                                             class="w-full h-32 object-contain rounded-lg mb-2 bg-gray-50 p-2">
+                                        <p class="text-sm text-gray-600">Logo</p>
+                                        <button onclick="deleteAsset('${asset.id}')" 
+                                                class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+                                            <i class="fas fa-times text-xs"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            } else {
+                                return `
+                                    <div class="text-center relative">
+                                        <img src="${asset.file_url}" 
+                                             alt="${asset.platform} template" 
+                                             class="w-full h-32 object-cover rounded-lg mb-2">
+                                        <p class="text-sm text-gray-600">${asset.platform}</p>
+                                        <button onclick="deleteAsset('${asset.id}')" 
+                                                class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+                                            <i class="fas fa-times text-xs"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        }).join('');
+                        document.getElementById('currentAssets').innerHTML = assetsHtml;
+                    } else {
+                        document.getElementById('currentAssets').innerHTML = `
+                            <div class="text-center text-gray-500 col-span-full py-8">
+                                <i class="fas fa-folder-open text-4xl mb-2"></i>
+                                <p>Nessun asset caricato</p>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Load composition settings
+                const settingsResponse = await fetch(`${API_URL}/api/brand/settings`);
+                const settings = await settingsResponse.json();
+                
+                if (settings) {
+                    document.getElementById('autoApplyLogo').checked = settings.auto_apply_logo ?? true;
+                    document.getElementById('autoApplyTemplate').checked = settings.auto_apply_template ?? true;
+                    document.getElementById('logoPosition').value = settings.logo_position || 'bottom-right';
+                }
+                
+                console.log('Current tab after load:', currentTab);
+                console.log('=== LOAD BRAND ASSETS END ===');
+            } catch (error) {
+                console.error('Error loading brand assets:', error);
+                console.log('=== LOAD BRAND ASSETS ERROR ===');
+            }
+        }
+
+        // Check OpenAI Quota Status
+        async function checkQuotaStatus() {
+            try {
+                console.log('Checking quota status...');
+                const response = await fetch(`${API_URL}/api/quota/status`);
+                console.log('Quota response status:', response.status);
+                const data = await response.json();
+                console.log('Quota data:', data);
+                
+                const quotaStatus = document.getElementById('quotaStatus');
+                const quotaText = document.getElementById('quotaText');
+                
+                if (data.isAvailable) {
+                    quotaStatus.className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-sm text-green-700';
+                    quotaText.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Quota OK';
+                } else {
+                    quotaStatus.className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-sm text-red-700';
+                    quotaText.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>Quota esaurita';
+                    
+                    // Show recommendations if any
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        quotaStatus.title = data.recommendations.join('; ');
+                    }
+                }
+                
+                // Show additional info on hover
+                const info = [];
+                if (data.quotaInfo.imageGenerationAttempts > 0) {
+                    const successRate = (data.quotaInfo.imageGenerationSuccesses / data.quotaInfo.imageGenerationAttempts * 100).toFixed(1);
+                    info.push(`Immagini generate: ${data.quotaInfo.imageGenerationSuccesses}/${data.quotaInfo.imageGenerationAttempts} (${successRate}%)`);
+                }
+                if (data.quotaInfo.errorCount > 0) {
+                    info.push(`Errori: ${data.quotaInfo.errorCount}`);
+                }
+                if (data.quotaInfo.lastError) {
+                    info.push(`Ultimo errore: ${data.quotaInfo.lastError}`);
+                }
+                
+                if (info.length > 0) {
+                    quotaStatus.title = info.join(' | ');
+                }
+                
+            } catch (error) {
+                console.error('Error checking quota status:', error);
+                const quotaStatus = document.getElementById('quotaStatus');
+                const quotaText = document.getElementById('quotaText');
+                quotaStatus.className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-sm text-gray-600';
+                quotaText.innerHTML = '<i class="fas fa-question-circle mr-1"></i>Stato quota sconosciuto';
+            }
+        }
+
+        // GLOBAL: Block all navigation attempts
+        window.BLOCK_ALL_NAVIGATION = false;
+        
+        // Override ALL navigation methods
+        const originalReload = window.location.reload;
+        const originalAssign = window.location.assign;
+        const originalReplace = window.location.replace;
+        
+        window.location.reload = function() {
+            console.error('BLOCKED: window.location.reload()');
+            console.trace();
+            if (!window.BLOCK_ALL_NAVIGATION) {
+                return originalReload.apply(window.location, arguments);
+            }
+        };
+        
+        window.location.assign = function(url) {
+            console.error('BLOCKED: window.location.assign()', url);
+            console.trace();
+            if (!window.BLOCK_ALL_NAVIGATION) {
+                return originalAssign.apply(window.location, arguments);
+            }
+        };
+        
+        window.location.replace = function(url) {
+            console.error('BLOCKED: window.location.replace()', url);
+            console.trace();
+            if (!window.BLOCK_ALL_NAVIGATION) {
+                return originalReplace.apply(window.location, arguments);
+            }
+        };
+        
+        // Override history methods
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        
+        history.pushState = function() {
+            console.error('BLOCKED: history.pushState', arguments);
+            if (!window.BLOCK_ALL_NAVIGATION) {
+                return originalPushState.apply(history, arguments);
+            }
+        };
+        
+        history.replaceState = function() {
+            console.error('BLOCKED: history.replaceState', arguments);
+            if (!window.BLOCK_ALL_NAVIGATION) {
+                return originalReplaceState.apply(history, arguments);
+            }
+        };
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('GLOBAL ERROR:', e.message, e.filename, e.lineno, e.colno);
+            console.error('Error object:', e.error);
+            if (e.error && e.error.stack) {
+                console.error('Stack trace:', e.error.stack);
+            }
+            // Prevent default error handling which might cause reload
+            e.preventDefault();
+            return true;
+        });
+        
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('UNHANDLED PROMISE REJECTION:', e.reason);
+            e.preventDefault();
+            return true;
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Monitor location changes (can't redefine location property)
+            const originalHref = window.location.href;
+            const checkLocation = setInterval(() => {
+                if (window.location.href !== originalHref && !window.location.href.includes('#')) {
+                    console.error('DETECTED: Location changed from', originalHref, 'to', window.location.href);
+                    console.trace();
+                    
+                    // Force back to original if navigation is blocked
+                    if (window.BLOCK_ALL_NAVIGATION) {
+                        console.error('FORCING BACK TO ORIGINAL URL');
+                        window.location.href = originalHref;
+                    }
+                }
+            }, 50);
+            
+            // Monitor DOM changes that might affect tabs
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const target = mutation.target;
+                        if (target.classList.contains('tab-content')) {
+                            console.log('Tab visibility changed:', target.id, 
+                                'Active:', target.classList.contains('active'));
+                        }
+                    }
+                });
+            });
+            
+            // Start observing after DOM is ready
+            setTimeout(() => {
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    observer.observe(tab, { attributes: true, attributeFilter: ['class'] });
+                });
+            }, 100);
+            
+            // Prevent all forms from submitting normally
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+            });
+            
+            // Start with the current tab from URL hash or default to 'create'
+            const currentHash = window.location.hash.substring(1) || 'create';
+            console.log('Initial tab:', currentHash);
+            
+            // Add hash change listener to prevent unwanted navigation
+            window.addEventListener('hashchange', function(e) {
+                console.log('Hash changed from', e.oldURL, 'to', e.newURL);
+                console.trace('Hash change trace:');
+                // Don't prevent default here as it might break normal navigation
+            });
+            
+            // Add beforeunload listener to catch any page unload attempts
+            window.addEventListener('beforeunload', function(e) {
+                console.error('Page is trying to unload!');
+                console.trace();
+                if (window.isUploading) {
+                    e.preventDefault();
+                    e.returnValue = 'Upload in corso...';
+                    return 'Upload in corso...';
+                }
+            });
+            
+            // Intercept all clicks to catch navigation
+            document.addEventListener('click', function(e) {
+                if (window.isUploading) {
+                    console.log('Click during upload on:', e.target);
+                    if (e.target.tagName === 'A' || e.target.closest('a')) {
+                        console.error('BLOCKED: Link click during upload');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }
+            }, true);
+            
+            switchTab(currentHash);
+            
+            updateCharCount();
+            // Temporarily disable some functions to isolate the issue
+            // loadScheduledPosts();
+            // loadSettings();
+            // updateStats();
+            
+            // Load brand assets only if we're on the graphics tab
+            if (currentHash === 'graphics') {
+                console.log('Initial load: Loading brand assets for graphics tab');
+                loadBrandAssets();
+            }
+            
+            checkQuotaStatus();
+            
+            // Check quota status every minute
+            // TEMPORARILY DISABLED - might be causing refresh issues
+            // setInterval(checkQuotaStatus, 60000);
+            
+            // Add event listeners for platform checkboxes after DOM is loaded
+            setTimeout(() => {
+                document.querySelectorAll('.ai-platform-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedPlatforms);
+                });
+                
+                // Add logo upload listeners
+                const logoUploadBtn = document.getElementById('logoUploadBtn');
+                const logoUploadInput = document.getElementById('logoUpload');
+                
+                if (logoUploadBtn && logoUploadInput) {
+                    logoUploadBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        logoUploadInput.click();
+                    });
+                    
+                    logoUploadInput.addEventListener('change', uploadLogo);
+                }
+            }, 100);
+        });
+
+        // Tab Switching
+        function switchTab(tab) {
+            console.log('switchTab called with:', tab, 'Current tab:', currentTab);
+            
+            // Prevent switching if we're uploading or navigating is blocked
+            if (window.isUploading || window.blockNavigation) {
+                console.log('Tab switch blocked:', {
+                    isUploading: window.isUploading,
+                    blockNavigation: window.blockNavigation
+                });
+                return;
+            }
+            
+            // Hide all tabs
+            console.log('Hiding all tabs...');
+            document.querySelectorAll('.tab-content').forEach(t => {
+                if (t.classList.contains('active')) {
+                    console.log('Hiding active tab:', t.id);
+                }
+                t.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-500');
+                b.classList.add('text-gray-600');
+            });
+            
+            // Show selected tab
+            const tabElement = document.getElementById(`${tab}-tab`);
+            if (!tabElement) {
+                console.error('Tab not found:', tab);
+                return;
+            }
+            tabElement.classList.add('active');
+            
+            const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600');
+                activeBtn.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-500');
+            }
+            
+            currentTab = tab;
+            
+            // Load tab-specific data
+            if (tab === 'schedule') {
+                renderCalendar();
+            } else if (tab === 'analytics') {
+                updateAnalytics();
+            } else if (tab === 'graphics') {
+                console.log('Switched to graphics tab, loading assets...');
+                loadBrandAssets();
+            }
+            
+            // Log the call stack to see what triggered the tab switch
+            console.log('Tab switch call stack:', new Error().stack);
+        }
+
+        // Character Counter
+        document.getElementById('postContent').addEventListener('input', updateCharCount);
+        function updateCharCount() {
+            const content = document.getElementById('postContent').value;
+            document.getElementById('charCount').textContent = `${content.length} caratteri`;
+        }
+
+        // Add Emoji
+        function addEmoji(emoji) {
+            const textarea = document.getElementById('postContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + emoji + text.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + emoji.length, start + emoji.length);
+            updateCharCount();
+        }
+
+        // Publish Now
+        async function publishNow() {
+            const content = document.getElementById('postContent').value;
+            const platforms = Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value);
+            const hashtags = document.getElementById('postHashtags').value.split(' ').filter(tag => tag.startsWith('#'));
+            const link = document.getElementById('postLink').value;
+            const imageUrl = document.getElementById('postImage').value;
+
+            if (!content || platforms.length === 0) {
+                showNotification('error', 'Errore', 'Inserisci contenuto e seleziona almeno una piattaforma');
+                return;
+            }
+
+            try {
+                // Prepare platform-specific images if available
+                const platformImages = {};
+                if (window.currentGeneratedImages) {
+                    platforms.forEach(platform => {
+                        if (window.currentGeneratedImages[platform]) {
+                            platformImages[platform] = window.currentGeneratedImages[platform].url;
+                        }
+                    });
+                }
+                
+                const response = await fetch(`${API_URL}/api/social/post`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content,
+                        platforms,
+                        hashtags,
+                        link,
+                        imageUrl: imageUrl || (Object.keys(platformImages).length > 0 ? null : undefined),
+                        platformImages: Object.keys(platformImages).length > 0 ? platformImages : undefined
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('success', 'Post Pubblicato!', `Su ${platforms.join(', ')}`);
+                    document.getElementById('createPostForm').reset();
+                    updateStats();
+                } else {
+                    showNotification('error', 'Errore', result.error || 'Errore nella pubblicazione');
+                }
+            } catch (error) {
+                showNotification('error', 'Errore', error.message);
+            }
+        }
+
+        // Schedule Post
+        function schedulePost() {
+            const content = document.getElementById('postContent').value;
+            if (!content) {
+                showNotification('error', 'Errore', 'Inserisci il contenuto del post');
+                return;
+            }
+            openScheduleModal();
+        }
+
+        // Save Draft
+        function saveDraft() {
+            const draft = {
+                content: document.getElementById('postContent').value,
+                platforms: Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value),
+                hashtags: document.getElementById('postHashtags').value,
+                link: document.getElementById('postLink').value,
+                imageUrl: document.getElementById('postImage').value,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('draftPost', JSON.stringify(draft));
+            showNotification('success', 'Bozza Salvata', 'Puoi continuare più tardi');
+        }
+
+        // AI Generator
+        async function generateAIContent() {
+            const topic = document.getElementById('aiTopic').value;
+            const tone = document.getElementById('aiTone').value;
+
+            if (!topic) {
+                showNotification('error', 'Errore', 'Inserisci un argomento');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('aiResults');
+            resultsDiv.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/content/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic,
+                        tone,
+                        length: selectedLength,
+                        platforms: ['facebook', 'instagram', 'twitter', 'linkedin']
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.content) {
+                    displayAIResults(result.content);
+                } else {
+                    resultsDiv.innerHTML = '<div class="text-center text-red-500 py-8">Errore nella generazione</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="text-center text-red-500 py-8">Errore: ${error.message}</div>`;
+            }
+        }
+
+        function displayAIResults(content) {
+            const resultsDiv = document.getElementById('aiResults');
+            resultsDiv.innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-medium">Contenuto Generato</h4>
+                        <button onclick="useAIContent()" class="text-blue-600 hover:text-blue-700">
+                            <i class="fas fa-copy mr-1"></i>Usa
+                        </button>
+                    </div>
+                    <p class="text-gray-700 mb-3">${content.content || content}</p>
+                    ${content.hashtags ? `<p class="text-sm text-gray-600">${content.hashtags.join(' ')}</p>` : ''}
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="regenerateAI()" class="p-2 border rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-redo mr-2"></i>Rigenera
+                    </button>
+                    <button onclick="improveAI()" class="p-2 border rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-magic mr-2"></i>Migliora
+                    </button>
+                </div>
+            `;
+            
+            // Store for later use
+            window.lastAIContent = content;
+        }
+
+        function useAIContent() {
+            if (window.lastAIContent) {
+                document.getElementById('postContent').value = window.lastAIContent.content || window.lastAIContent;
+                if (window.lastAIContent.hashtags) {
+                    document.getElementById('postHashtags').value = window.lastAIContent.hashtags.join(' ');
+                }
+                switchTab('create');
+                showNotification('success', 'Contenuto Copiato', 'Pronto per la pubblicazione');
+            }
+        }
+
+        // Calendar Functions
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Monday
+            
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 28; i++) { // 4 weeks
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'border rounded-lg p-2 min-h-[100px] hover:bg-gray-50 cursor-pointer';
+                
+                if (date.toDateString() === today.toDateString()) {
+                    dayDiv.classList.add('bg-blue-50', 'border-blue-500');
+                }
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'font-medium text-sm';
+                dayNumber.textContent = date.getDate();
+                
+                const postsCount = getPostsForDate(date);
+                if (postsCount > 0) {
+                    const badge = document.createElement('div');
+                    badge.className = 'mt-1 text-xs bg-purple-100 text-purple-700 rounded-full px-2 py-1 text-center';
+                    badge.textContent = `${postsCount} post`;
+                    dayDiv.appendChild(badge);
+                }
+                
+                dayDiv.appendChild(dayNumber);
+                dayDiv.onclick = () => showDayPosts(date);
+                grid.appendChild(dayDiv);
+            }
+        }
+
+        function getPostsForDate(date) {
+            return scheduledPosts.filter(post => {
+                const postDate = new Date(post.scheduledTime);
+                return postDate.toDateString() === date.toDateString();
+            }).length;
+        }
+
+        // Schedule Modal
+        function openScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('hidden');
+            // Set default date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('scheduleDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('scheduleTime').value = '10:00';
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.add('hidden');
+        }
+
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = document.getElementById('scheduleDate').value;
+            const time = document.getElementById('scheduleTime').value;
+            const scheduledTime = new Date(`${date}T${time}`);
+            
+            const post = {
+                content: document.getElementById('postContent').value,
+                platforms: Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value),
+                hashtags: document.getElementById('postHashtags').value.split(' ').filter(tag => tag.startsWith('#')),
+                link: document.getElementById('postLink').value,
+                imageUrl: document.getElementById('postImage').value,
+                scheduledTime: scheduledTime.toISOString()
+            };
+            
+            // Save to scheduled posts
+            scheduledPosts.push(post);
+            localStorage.setItem('scheduledPosts', JSON.stringify(scheduledPosts));
+            
+            closeScheduleModal();
+            showNotification('success', 'Post Programmato', `Per ${scheduledTime.toLocaleString('it-IT')}`);
+            document.getElementById('createPostForm').reset();
+            
+            if (currentTab === 'schedule') {
+                renderCalendar();
+                loadScheduledPosts();
+            }
+        });
+
+        // Load Scheduled Posts
+        function loadScheduledPosts() {
+            const saved = localStorage.getItem('scheduledPosts');
+            scheduledPosts = saved ? JSON.parse(saved) : [];
+            
+            const list = document.getElementById('scheduledList');
+            if (!list) return;
+            
+            const upcoming = scheduledPosts
+                .filter(post => new Date(post.scheduledTime) > new Date())
+                .sort((a, b) => new Date(a.scheduledTime) - new Date(b.scheduledTime));
+            
+            if (upcoming.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-8">Nessun post programmato</p>';
+                return;
+            }
+            
+            list.innerHTML = upcoming.map((post, index) => `
+                <div class="border rounded-lg p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600 mb-1">
+                                ${new Date(post.scheduledTime).toLocaleString('it-IT')}
+                            </p>
+                            <p class="text-gray-800">${post.content.substring(0, 100)}...</p>
+                            <div class="flex gap-2 mt-2">
+                                ${post.platforms.map(p => `
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">${p}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <button onclick="deleteScheduledPost(${index})" 
+                                class="text-red-500 hover:text-red-700 ml-4">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Settings
+        async function saveSettings() {
+            const settings = {
+                // Company Context
+                companyName: document.getElementById('companyName').value,
+                companyIndustry: document.getElementById('companyIndustry').value,
+                companyDescription: document.getElementById('companyDescription').value,
+                targetAudience: document.getElementById('targetAudience').value,
+                brandVoice: document.getElementById('brandVoice').value,
+                businessGoals: document.getElementById('businessGoals').value,
+                // Scheduler Settings
+                autoScheduler: document.getElementById('autoScheduler').checked,
+                postFrequency: document.getElementById('postFrequency').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                defaultPlatforms: {
+                    facebook: document.getElementById('defaultFacebook').checked,
+                    instagram: document.getElementById('defaultInstagram').checked,
+                    twitter: document.getElementById('defaultTwitter').checked,
+                    linkedin: document.getElementById('defaultLinkedin').checked
+                },
+                defaultTone: document.getElementById('defaultTone').value,
+                defaultHashtags: document.getElementById('defaultHashtags').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to save settings');
+                }
+                
+                // Also save to localStorage for quick access
+                localStorage.setItem('socialSettings', JSON.stringify(settings));
+                showNotification('success', 'Impostazioni Salvate', 'Le modifiche sono state salvate su Supabase');
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showNotification('error', 'Errore', 'Impossibile salvare le impostazioni');
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                // First try to load from Supabase
+                const response = await fetch(`${API_URL}/api/settings`);
+                if (response.ok) {
+                    const dbSettings = await response.json();
+                    
+                    // Map database fields to form fields
+                    document.getElementById('companyName').value = dbSettings.company_name || 'Up to Ten';
+                    document.getElementById('companyIndustry').value = dbSettings.company_industry || 'Educazione, Ripetizioni Scientifiche, Formazione STEM';
+                    document.getElementById('companyDescription').value = dbSettings.company_description || 'Up to Ten è il centro di eccellenza per le ripetizioni a Milano di Matematica, Fisica, Informatica e tutte le materie scientifiche per medie, liceo e università. Specializzati nell\'insegnamento delle materie STEM attraverso applicazioni pratiche ed innovative, come lo SPORT, rendendole semplici e intuitive.';
+                    document.getElementById('targetAudience').value = dbSettings.target_audience || 'Studenti delle scuole medie, liceo e università, genitori che cercano supporto scolastico di qualità, studenti che preparano test d\'ingresso universitari (specialmente Bocconi)';
+                    document.getElementById('brandVoice').value = dbSettings.brand_voice || 'Professionale ma amichevole, innovativo, orientato ai risultati, empatico con le difficoltà degli studenti, entusiasta delle materie scientifiche';
+                    document.getElementById('businessGoals').value = dbSettings.business_goals || 'Aumentare le iscrizioni ai corsi, posizionarsi come leader nelle ripetizioni scientifiche a Milano, educare sull\'importanza delle materie STEM';
+                    
+                    // Scheduler settings
+                    document.getElementById('autoScheduler').checked = dbSettings.is_active || false;
+                    document.getElementById('postFrequency').value = dbSettings.frequency_hours || '4';
+                    document.getElementById('startTime').value = dbSettings.active_hours_start || '08:00';
+                    document.getElementById('endTime').value = dbSettings.active_hours_end || '22:00';
+                    
+                    // Default settings
+                    document.getElementById('defaultTone').value = dbSettings.default_tone || 'professional';
+                    document.getElementById('defaultHashtags').value = dbSettings.default_hashtags || '#UpToTen #RipetizioniMilano #Matematica #Fisica #STEM #Scuola #Università';
+                    
+                    // Platforms
+                    const platforms = dbSettings.platforms || [];
+                    document.getElementById('defaultFacebook').checked = platforms.includes('facebook');
+                    document.getElementById('defaultInstagram').checked = platforms.includes('instagram');
+                    document.getElementById('defaultTwitter').checked = platforms.includes('twitter');
+                    document.getElementById('defaultLinkedin').checked = platforms.includes('linkedin');
+                    
+                    return;
+                }
+            } catch (error) {
+                console.error('Error loading settings from database:', error);
+            }
+            
+            // Fallback to localStorage if database fails
+            const saved = localStorage.getItem('socialSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                // Company Context
+                document.getElementById('companyName').value = settings.companyName || 'Up to Ten';
+                document.getElementById('companyIndustry').value = settings.companyIndustry || 'Educazione, Ripetizioni Scientifiche, Formazione STEM';
+                document.getElementById('companyDescription').value = settings.companyDescription || 'Up to Ten è il centro di eccellenza per le ripetizioni a Milano di Matematica, Fisica, Informatica e tutte le materie scientifiche per medie, liceo e università. Specializzati nell\'insegnamento delle materie STEM attraverso applicazioni pratiche ed innovative, come lo SPORT, rendendole semplici e intuitive.';
+                document.getElementById('targetAudience').value = settings.targetAudience || 'Studenti delle scuole medie, liceo e università, genitori che cercano supporto scolastico di qualità, studenti che preparano test d\'ingresso universitari (specialmente Bocconi)';
+                document.getElementById('brandVoice').value = settings.brandVoice || 'Professionale ma amichevole, innovativo, orientato ai risultati, empatico con le difficoltà degli studenti, entusiasta delle materie scientifiche';
+                document.getElementById('businessGoals').value = settings.businessGoals || 'Aumentare le iscrizioni ai corsi, posizionarsi come leader nelle ripetizioni scientifiche a Milano, educare sull\'importanza delle materie STEM';
+                
+                // Scheduler Settings
+                document.getElementById('autoScheduler').checked = settings.autoScheduler || false;
+                document.getElementById('postFrequency').value = settings.postFrequency || '4';
+                document.getElementById('startTime').value = settings.startTime || '08:00';
+                document.getElementById('endTime').value = settings.endTime || '22:00';
+                
+                // Default settings
+                document.getElementById('defaultTone').value = settings.defaultTone || 'professional';
+                document.getElementById('defaultHashtags').value = settings.defaultHashtags || '#UpToTen #RipetizioniMilano #Matematica #Fisica #STEM #Scuola #Università';
+                
+                if (settings.defaultPlatforms) {
+                    document.getElementById('defaultFacebook').checked = settings.defaultPlatforms.facebook;
+                    document.getElementById('defaultInstagram').checked = settings.defaultPlatforms.instagram;
+                    document.getElementById('defaultTwitter').checked = settings.defaultPlatforms.twitter;
+                    document.getElementById('defaultLinkedin').checked = settings.defaultPlatforms.linkedin;
+                }
+            } else {
+                // Set default values for Up to Ten
+                document.getElementById('companyName').value = 'Up to Ten';
+                document.getElementById('companyIndustry').value = 'Educazione, Ripetizioni Scientifiche, Formazione STEM';
+                document.getElementById('companyDescription').value = 'Up to Ten è il centro di eccellenza per le ripetizioni a Milano di Matematica, Fisica, Informatica e tutte le materie scientifiche per medie, liceo e università. Specializzati nell\'insegnamento delle materie STEM attraverso applicazioni pratiche ed innovative, come lo SPORT, rendendole semplici e intuitive.';
+                document.getElementById('targetAudience').value = 'Studenti delle scuole medie, liceo e università, genitori che cercano supporto scolastico di qualità, studenti che preparano test d\'ingresso universitari (specialmente Bocconi)';
+                document.getElementById('brandVoice').value = 'Professionale ma amichevole, innovativo, orientato ai risultati, empatico con le difficoltà degli studenti, entusiasta delle materie scientifiche';
+                document.getElementById('businessGoals').value = 'Aumentare le iscrizioni ai corsi, posizionarsi come leader nelle ripetizioni scientifiche a Milano, educare sull\'importanza delle materie STEM';
+                document.getElementById('defaultHashtags').value = '#UpToTen #RipetizioniMilano #Matematica #Fisica #STEM #Scuola #Università';
+            }
+        }
+
+        // Stats
+        async function updateStats() {
+            try {
+                // Get today's posts
+                const response = await fetch(`${API_URL}/api/posts`);
+                const data = await response.json();
+                const posts = Array.isArray(data) ? data : (data.posts || []);
+                
+                const todayPosts = posts.filter(p => 
+                    new Date(p.published_time).toDateString() === new Date().toDateString()
+                );
+                
+                // Calculate total engagement
+                let totalEngagement = 0;
+                posts.forEach(post => {
+                    if (post.performance && post.performance.current_metrics) {
+                        totalEngagement += (post.performance.current_metrics.likes || 0) + 
+                                         (post.performance.current_metrics.comments || 0) + 
+                                         (post.performance.current_metrics.shares || 0);
+                    }
+                });
+                
+                document.getElementById('todayPosts').textContent = todayPosts.length;
+                document.getElementById('scheduledPosts').textContent = posts.filter(p => p.status === 'scheduled').length;
+                document.getElementById('totalEngagement').textContent = 
+                    totalEngagement > 1000 ? `${(totalEngagement / 1000).toFixed(1)}K` : totalEngagement.toString();
+                
+                // Count AI debates used
+                const debatesUsed = posts.filter(p => p.metadata && p.metadata.debate_used).length;
+                document.getElementById('aiDebatesUsed').textContent = debatesUsed;
+            } catch (error) {
+                console.error('Error updating stats:', error);
+                document.getElementById('todayPosts').textContent = '0';
+                document.getElementById('scheduledPosts').textContent = '0';
+                document.getElementById('totalEngagement').textContent = '0';
+                document.getElementById('aiDebatesUsed').textContent = '0';
+            }
+        }
+
+        // Loader functions - DEPRECATED, using custom modals instead
+        function showLoader(message = 'Caricamento...') {
+            // No longer used - we use custom modals now
+        }
+
+        function hideLoader() {
+            // No longer used - we use custom modals now
+        }
+
+        // Notifications
+        function showNotification(type, title, detail = '') {
+            // TEMPORARILY DISABLED to debug refresh issue
+            console.log(`Notification: ${type} - ${title} - ${detail}`);
+            console.log('Current tab when notification shown:', currentTab);
+            return;
+            const notification = document.getElementById('notification');
+            const icon = document.getElementById('notificationIcon');
+            const text = document.getElementById('notificationText');
+            const detailText = document.getElementById('notificationDetail');
+            
+            // Set icon and color based on type
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-500 text-xl';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle text-red-500 text-xl';
+            } else {
+                icon.className = 'fas fa-info-circle text-blue-500 text-xl';
+            }
+            
+            text.textContent = title;
+            detailText.textContent = detail;
+            
+            notification.classList.remove('hidden');
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Helper Functions
+        function setContentType(type) {
+            selectedContentType = type;
+            document.querySelectorAll('.content-type-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'border-blue-500');
+            });
+            event.target.classList.add('bg-blue-50', 'border-blue-500');
+        }
+
+        function setLength(length) {
+            selectedLength = length;
+            document.querySelectorAll('.length-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'border-blue-500');
+            });
+            event.target.classList.add('bg-blue-50', 'border-blue-500');
+        }
+
+        function deleteScheduledPost(index) {
+            scheduledPosts.splice(index, 1);
+            localStorage.setItem('scheduledPosts', JSON.stringify(scheduledPosts));
+            loadScheduledPosts();
+            if (currentTab === 'schedule') {
+                renderCalendar();
+            }
+            showNotification('success', 'Post Eliminato', 'Il post programmato è stato rimosso');
+        }
+
+        // AI Templates
+        function useAITemplate(template) {
+            const templates = {
+                'motivational-monday': {
+                    topic: 'Motivazione per iniziare la settimana',
+                    tone: 'inspirational'
+                },
+                'tip-tuesday': {
+                    topic: 'Consigli pratici di social media marketing',
+                    tone: 'educational'
+                },
+                'wisdom-wednesday': {
+                    topic: 'Citazioni e riflessioni sul business',
+                    tone: 'professional'
+                },
+                'throwback-thursday': {
+                    topic: 'Storia di successo o case study',
+                    tone: 'casual'
+                }
+            };
+            
+            const selected = templates[template];
+            if (selected) {
+                document.getElementById('aiTopic').value = selected.topic;
+                document.getElementById('aiTone').value = selected.tone;
+                generateAIContent();
+            }
+        }
+
+        // Analytics
+        function updateAnalytics() {
+            // Simulated data - replace with API call
+            document.getElementById('totalReach').textContent = '6.3K';
+            document.getElementById('engagementRate').textContent = '4.8%';
+            document.getElementById('clickRate').textContent = '2.1%';
+            
+            // Top posts
+            const topPostsHtml = `
+                <div class="border rounded-lg p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-medium">5 Tips per il Social Media Marketing</p>
+                        <span class="text-sm text-gray-600">2 giorni fa</span>
+                    </div>
+                    <div class="flex gap-4 text-sm text-gray-600">
+                        <span><i class="fas fa-eye mr-1"></i>1.2K</span>
+                        <span><i class="fas fa-heart mr-1"></i>89</span>
+                        <span><i class="fas fa-comment mr-1"></i>12</span>
+                        <span><i class="fas fa-share mr-1"></i>5</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('topPosts').innerHTML = topPostsHtml;
+        }
+
+        // Calendar Navigation
+        function previousWeek() {
+            // Implementation for calendar navigation
+            showNotification('info', 'Settimana Precedente');
+        }
+
+        function nextWeek() {
+            // Implementation for calendar navigation
+            showNotification('info', 'Settimana Successiva');
+        }
+
+        function showDayPosts(date) {
+            // Show posts for specific day
+            const posts = scheduledPosts.filter(post => {
+                const postDate = new Date(post.scheduledTime);
+                return postDate.toDateString() === date.toDateString();
+            });
+            
+            if (posts.length > 0) {
+                showNotification('info', `${posts.length} post`, date.toLocaleDateString('it-IT'));
+            }
+        }
+
+        function generateEditorialPlan() {
+            showNotification('info', 'Generazione Piano Editoriale', 'Funzionalità in arrivo...');
+        }
+
+        // AI Training Functions
+        async function startTraining() {
+            showLoader('Avvio training AI...');
+            try {
+                const response = await fetch(`${API_URL}/api/training/train`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                hideLoader();
+                
+                if (result.trained) {
+                    showNotification('success', 'Training Completato', `Analizzati ${result.insights.length} pattern`);
+                    loadTrainingInsights();
+                } else {
+                    showNotification('error', 'Training Fallito', result.insights[0]);
+                }
+            } catch (error) {
+                hideLoader();
+                showNotification('error', 'Errore Training', error.message);
+            }
+        }
+
+        async function loadTrainingInsights() {
+            try {
+                const [insights, preferences] = await Promise.all([
+                    fetch(`${API_URL}/api/training/insights`).then(r => r.json()),
+                    fetch(`${API_URL}/api/training/preferences`).then(r => r.json())
+                ]);
+                
+                // Update UI with insights
+                document.getElementById('analyzedPosts').textContent = preferences.learningHistory.totalPosts;
+                document.getElementById('performanceImprovement').textContent = 
+                    `+${preferences.learningHistory.improvementRate.toFixed(1)}%`;
+                document.getElementById('lastTraining').textContent = 
+                    new Date(preferences.learningHistory.lastUpdated).toLocaleDateString('it-IT');
+                
+                // Update preferences display
+                document.getElementById('emojiUsage').textContent = 
+                    preferences.contentPreferences.emojisUsage.charAt(0).toUpperCase() + 
+                    preferences.contentPreferences.emojisUsage.slice(1);
+                
+                // Display top performing posts
+                if (insights.topPerformingContent.length > 0) {
+                    const topPostsHtml = insights.topPerformingContent.slice(0, 3).map(post => `
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-sm font-medium text-green-900 truncate">${post.content}</p>
+                            <p class="text-xs text-green-700 mt-1">
+                                Engagement: ${post.performance.engagementRate.toFixed(2)}%
+                            </p>
+                        </div>
+                    `).join('');
+                    document.getElementById('topPerformingPosts').innerHTML = topPostsHtml;
+                }
+                
+                // Display recommendations
+                if (insights.recommendations.length > 0) {
+                    const recsHtml = insights.recommendations.map(rec => `
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-lightbulb text-yellow-500 mt-0.5"></i>
+                            <p class="text-sm">${rec}</p>
+                        </div>
+                    `).join('');
+                    document.getElementById('aiRecommendations').innerHTML = recsHtml;
+                }
+                
+                // Calculate debate improvement
+                if (insights.trends.debateVsNonDebate) {
+                    const improvement = 
+                        ((insights.trends.debateVsNonDebate.withDebate.avgEngagement - 
+                          insights.trends.debateVsNonDebate.withoutDebate.avgEngagement) / 
+                         insights.trends.debateVsNonDebate.withoutDebate.avgEngagement) * 100;
+                    document.getElementById('debateImprovement').textContent = 
+                        improvement > 0 ? `+${improvement.toFixed(1)}%` : `${improvement.toFixed(1)}%`;
+                }
+            } catch (error) {
+                console.error('Error loading insights:', error);
+            }
+        }
+
+        async function loadDebateHistory() {
+            try {
+                const debates = await fetch(`${API_URL}/api/debates/history?limit=5`).then(r => r.json());
+                
+                const debateHtml = debates.map(debate => `
+                    <div class="border rounded-lg p-4 hover:bg-gray-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-medium text-sm">${debate.content.substring(0, 100)}...</p>
+                            <span class="text-xs text-gray-600">
+                                ${new Date(debate.generated_at).toLocaleDateString('it-IT')}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                            <span><i class="fas fa-robot mr-1"></i>AI Debate</span>
+                            <span><i class="fas fa-chart-line mr-1"></i>
+                                ${debate.performance?.engagementRate?.toFixed(2) || 0}% engagement
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('debateHistory').innerHTML = debateHtml || 
+                    '<p class="text-gray-500 text-sm">Nessun dibattito registrato</p>';
+            } catch (error) {
+                console.error('Error loading debate history:', error);
+            }
+        }
+
+        async function quickFeedback(rating) {
+            // Implementation for quick feedback
+            const ratingMap = {
+                'excellent': 5,
+                'good': 4,
+                'poor': 2
+            };
+            
+            showNotification('success', 'Feedback Registrato', 'Grazie per il tuo feedback!');
+            
+            // Reload insights after feedback
+            setTimeout(() => loadTrainingInsights(), 1000);
+        }
+        
+        // Show AI Debate Modal
+        function showDebateModal() {
+            const modal = document.getElementById('debateModal');
+            const contentDiv = document.getElementById('debateContent');
+            
+            if (!window.debateTranscript) {
+                contentDiv.innerHTML = '<p class="text-gray-500">Nessun dibattito disponibile</p>';
+                return;
+            }
+            
+            // Format debate transcript
+            const transcript = window.generatedContent.debateHistory || window.debateTranscript;
+            
+            if (Array.isArray(transcript)) {
+                contentDiv.innerHTML = transcript.map((round, index) => `
+                    <div class="border rounded-lg p-4 ${round.agent === 'Claude' ? 'bg-blue-50' : 'bg-green-50'}">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-8 h-8 rounded-full ${round.agent === 'Claude' ? 'bg-blue-500' : 'bg-green-500'} flex items-center justify-center">
+                                <i class="fas fa-robot text-white text-sm"></i>
+                            </div>
+                            <span class="font-medium">${round.agent || (index % 2 === 0 ? 'GPT-4' : 'Claude')}</span>
+                            <span class="text-xs text-gray-500">Round ${Math.floor(index / 2) + 1}</span>
+                        </div>
+                        <p class="text-gray-700">${round.message || round}</p>
+                    </div>
+                `).join('');
+            } else {
+                contentDiv.innerHTML = '<pre class="whitespace-pre-wrap text-sm">' + JSON.stringify(transcript, null, 2) + '</pre>';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // Close debate modal
+        function closeDebateModal() {
+            document.getElementById('debateModal').classList.add('hidden');
+        }
+
+        // Update generateAIContent to support debates
+        async function generateAIContent() {
+            console.log('=== GENERATE AI CONTENT START ===');
+            window.BLOCK_ALL_NAVIGATION = true;
+            
+            const topic = document.getElementById('aiTopic').value;
+            const tone = document.getElementById('aiTone').value;
+            const useDebate = document.getElementById('useAIDebate').checked;
+            
+            if (!topic) {
+                window.BLOCK_ALL_NAVIGATION = false;
+                showNotification('error', 'Errore', 'Inserisci un argomento');
+                return;
+            }
+            
+            // Show prompt being sent to AI
+            const promptModal = document.createElement('div');
+            promptModal.id = 'ai-prompt-modal';
+            promptModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            promptModal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2">
+                            <i class="fas fa-paper-plane text-blue-600"></i>
+                            ${useDebate ? 'Richiesta AI Debate' : 'Richiesta AI Generator'}
+                        </h3>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <h4 class="font-medium mb-2">Prompt inviato:</h4>
+                        <div class="space-y-2 text-sm">
+                            <p><strong>Argomento:</strong> ${topic}</p>
+                            <p><strong>Tono:</strong> ${tone}</p>
+                            <p><strong>Piattaforme:</strong> ${selectedPlatforms.join(', ')}</p>
+                            <p><strong>Tipo contenuto:</strong> ${selectedContentType}</p>
+                            <p><strong>Lunghezza:</strong> ${selectedLength}</p>
+                            ${useDebate ? '<p><strong>Modalità:</strong> <span class="text-amber-600">AI Debate attivo</span></p>' : ''}
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-2"></i>
+                        <p class="text-gray-600">${useDebate ? 'Claude e GPT-4 stanno dibattendo...' : 'Generazione in corso...'}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(promptModal);
+            
+            showLoader(useDebate ? 'AI Debate in corso...' : 'Generazione contenuto...');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/content/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        topic,
+                        tone,
+                        platforms: selectedPlatforms.length > 0 ? selectedPlatforms : ['facebook'],
+                        useDebate,
+                        // Include company context from settings
+                        companyContext: {
+                            name: document.getElementById('companyName')?.value || 'Up to Ten',
+                            industry: document.getElementById('companyIndustry')?.value || 'Educazione, Ripetizioni Scientifiche',
+                            description: document.getElementById('companyDescription')?.value || 'Centro di eccellenza per ripetizioni scientifiche a Milano',
+                            targetAudience: document.getElementById('targetAudience')?.value || 'Studenti e genitori',
+                            brandVoice: document.getElementById('brandVoice')?.value || 'Professionale ma amichevole',
+                            businessGoals: document.getElementById('businessGoals')?.value || 'Aumentare iscrizioni e brand awareness'
+                        },
+                        businessGoals: document.getElementById('businessGoals')?.value || 'Aumentare iscrizioni ai corsi',
+                        targetAudience: document.getElementById('targetAudience')?.value || 'Studenti e genitori'
+                    })
+                });
+                
+                const data = await response.json();
+                hideLoader();
+                console.log('AI content generated, data:', data);
+                
+                // Remove prompt modal
+                const promptModal = document.getElementById('ai-prompt-modal');
+                if (promptModal) {
+                    promptModal.remove();
+                }
+                
+                if (data.success) {
+                    // Store content ID for feedback
+                    window.currentContentId = data.contentId;
+                    window.generatedContent = data.content;
+                    window.generatedImages = data.images;
+                    
+                    // Debug log
+                    console.log('Generated images:', data.images);
+                    console.log('Content type:', typeof data.content);
+                    console.log('Content:', data.content);
+                    
+                    // Log each image URL for debugging
+                    if (data.images) {
+                        console.log('Images object exists:', data.images);
+                        console.log('Images keys:', Object.keys(data.images));
+                        Object.entries(data.images).forEach(([platform, imageData]) => {
+                            console.log(`Image URL for ${platform}:`, imageData?.url);
+                            console.log(`Image data for ${platform}:`, imageData);
+                        });
+                    } else {
+                        console.log('NO IMAGES IN RESPONSE!');
+                    }
+                    
+                    // Debug selected platforms
+                    console.log('Selected platforms:', selectedPlatforms);
+                    
+                    // Display platform-specific content
+                    let resultHtml = `
+                        <div class="bg-white rounded-lg border p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="font-medium">Contenuto Generato</h4>
+                                <div class="flex items-center gap-2">
+                                    ${useDebate ? '<span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">AI Debate</span>' : ''}
+                                    ${useDebate ? '<button onclick="showDebateModal()" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200"><i class="fas fa-comments mr-1"></i>Vedi Dibattito</button>' : ''}
+                                </div>
+                            </div>
+                    `;
+                    
+                    // Check if content is platform-specific
+                    if (typeof data.content === 'object' && (data.content.Facebook || data.content.Instagram || data.content.Twitter || data.content.LinkedIn)) {
+                        // Display each platform's content
+                        for (const platform of selectedPlatforms) {
+                            const platformKey = platform === 'linkedin' ? 'LinkedIn' : platform.charAt(0).toUpperCase() + platform.slice(1);
+                            const platformContent = data.content[platformKey];
+                            
+                            if (platformContent) {
+                                resultHtml += `
+                                    <div class="mb-4 p-3 bg-gray-50 rounded">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fab fa-${platform} text-${platform === 'facebook' ? 'blue-600' : platform === 'instagram' ? 'pink-600' : platform === 'twitter' ? 'blue-400' : 'blue-700'}"></i>
+                                            <span class="font-medium text-sm">${platformKey}</span>
+                                        </div>
+                                        <p class="text-gray-700 mb-2">${platformContent.main_content_text || platformContent.content || ''}</p>
+                                        ${data.images && data.images[platform] ? `
+                                            <div class="mb-2">
+                                                <img src="${data.images[platform].url}" alt="${platform} image" class="w-full rounded-lg shadow-sm" style="max-height: 300px; object-fit: cover;">
+                                                <p class="text-xs text-gray-500 mt-1">Dimensioni: ${data.images[platform].size.width}x${data.images[platform].size.height}</p>
+                                            </div>
+                                        ` : ''}
+                                        <div class="flex flex-wrap gap-1">
+                                            ${(platformContent.relevant_hashtags || platformContent.hashtags || '').split(' ').filter(tag => tag).map(tag => 
+                                                `<span class="text-xs text-blue-600">${tag}</span>`
+                                            ).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    } else if (typeof data.content === 'object' && data.content.content) {
+                        // Single content format
+                        resultHtml += `
+                            <p class="mb-3">${data.content.content}</p>
+                            ${data.images && Object.keys(data.images).length > 0 ? `
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    ${Object.entries(data.images).map(([platform, imageData]) => `
+                                        <div>
+                                            <img src="${imageData.url}" alt="${platform} image" class="w-full rounded-lg shadow-sm" style="max-height: 200px; object-fit: cover;">
+                                            <p class="text-xs text-gray-500 mt-1 text-center">${platform} (${imageData.size.width}x${imageData.size.height})</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                ${(data.content.hashtags || []).map(tag => 
+                                    `<span class="text-sm text-blue-600">${tag}</span>`
+                                ).join('')}
+                            </div>
+                        `;
+                    } else if (typeof data.content === 'object' && data.content.imagePrompt) {
+                        // New format with imagePrompt and platform content
+                        console.log('Using new format handler for content with imagePrompt');
+                        for (const platform of selectedPlatforms) {
+                            const platformContent = data.content[platform];
+                            console.log(`Processing platform ${platform}:`, platformContent);
+                            if (platformContent && typeof platformContent === 'object') {
+                                resultHtml += `
+                                    <div class="mb-4 p-3 bg-gray-50 rounded">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fab fa-${platform} text-${platform === 'facebook' ? 'blue-600' : platform === 'instagram' ? 'pink-600' : platform === 'twitter' ? 'blue-400' : 'blue-700'}"></i>
+                                            <span class="font-medium text-sm">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+                                        </div>
+                                        <p class="text-gray-700 mb-2">${platformContent.main_content_text || platformContent.content || ''}</p>
+                                        ${data.images && data.images[platform] ? `
+                                            <div class="mb-2">
+                                                <img src="${data.images[platform].url}" alt="${platform} image" class="w-full rounded-lg shadow-sm" style="max-height: 200px; object-fit: cover;">
+                                                <p class="text-xs text-gray-500 mt-1">${data.images[platform].size.width}x${data.images[platform].size.height}</p>
+                                            </div>
+                                        ` : ''}
+                                        <div class="flex flex-wrap gap-1 mt-2">
+                                            ${(platformContent.relevant_hashtags || platformContent.hashtags || '').split(' ').filter(tag => tag).map(tag => 
+                                                `<span class="text-sm text-blue-600">${tag}</span>`
+                                            ).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    } else if (typeof data.content === 'string') {
+                        // Simple string content
+                        resultHtml += `
+                            <p class="mb-3">${data.content}</p>
+                            ${data.images && Object.keys(data.images).length > 0 ? `
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    ${Object.entries(data.images).map(([platform, imageData]) => `
+                                        <div>
+                                            <img src="${imageData.url}" alt="${platform} image" class="w-full rounded-lg shadow-sm" style="max-height: 200px; object-fit: cover;">
+                                            <p class="text-xs text-gray-500 mt-1 text-center">${platform} (${imageData.size.width}x${imageData.size.height})</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        `;
+                    }
+                    
+                    resultHtml += `
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="useGeneratedContent()" 
+                                        class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                                    <i class="fas fa-check mr-2"></i>Usa Contenuto
+                                </button>
+                                <button onclick="provideFeedback('${data.contentId}')" 
+                                        class="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700">
+                                    <i class="fas fa-comment mr-2"></i>Feedback
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('aiResults').innerHTML = resultHtml;
+                    
+                    // Show debate transcript if available
+                    if (useDebate && data.content.insights) {
+                        document.getElementById('debateTranscript').classList.remove('hidden');
+                        const debateHtml = data.content.insights.map(insight => 
+                            `<p class="text-gray-700">• ${insight}</p>`
+                        ).join('');
+                        document.getElementById('debateContent').innerHTML = debateHtml;
+                    }
+                } else {
+                    showNotification('error', 'Errore', data.error);
+                    window.BLOCK_ALL_NAVIGATION = false;
+                }
+                
+                console.log('=== GENERATE AI CONTENT END ===');
+                // Delay reset to ensure all async operations complete
+                setTimeout(() => {
+                    window.BLOCK_ALL_NAVIGATION = false;
+                    console.log('Navigation block released');
+                }, 1000);
+            } catch (error) {
+                hideLoader();
+                window.BLOCK_ALL_NAVIGATION = false;
+                
+                // Remove prompt modal
+                const promptModal = document.getElementById('ai-prompt-modal');
+                if (promptModal) {
+                    promptModal.remove();
+                }
+                
+                // Check if it's a quota error
+                if (error.message && (error.message.includes('429') || error.message.includes('quota'))) {
+                    showNotification('error', 'Quota OpenAI Esaurita', 
+                        'Il limite di utilizzo API è stato raggiunto. ' +
+                        '<a href="https://platform.openai.com/account/billing" target="_blank" class="underline">Controlla il tuo piano</a>');
+                    
+                    // Update quota status immediately
+                    checkQuotaStatus();
+                } else {
+                    showNotification('error', 'Errore', error.message);
+                }
+            }
+        }
+
+        async function provideFeedback(contentId) {
+            const rating = prompt('Valuta il contenuto da 1 a 5:');
+            if (rating && rating >= 1 && rating <= 5) {
+                try {
+                    await fetch(`${API_URL}/api/feedback/content`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contentId,
+                            rating: parseInt(rating),
+                            issues: rating < 3 ? ['Tono non appropriato'] : [],
+                            improvements: rating < 3 ? ['Più personalizzazione'] : []
+                        })
+                    });
+                    
+                    showNotification('success', 'Feedback Salvato', 'L\'AI migliorerà grazie al tuo feedback');
+                } catch (error) {
+                    showNotification('error', 'Errore', 'Impossibile salvare feedback');
+                }
+            }
+        }
+
+        function useGeneratedContent(contentId) {
+            // Get the generated content from the results
+            const resultDiv = document.getElementById('aiResults');
+            const contentElements = resultDiv.querySelectorAll('p');
+            if (contentElements.length > 1) {
+                const content = contentElements[1].textContent; // Second p tag contains the content
+                // Copy to create post form
+                document.getElementById('postContent').value = content;
+                
+                // Extract hashtags if present
+                const hashtagSpans = resultDiv.querySelectorAll('.text-blue-600');
+                if (hashtagSpans.length > 0) {
+                    const hashtags = Array.from(hashtagSpans).map(span => span.textContent).join(' ');
+                    document.getElementById('postHashtags').value = hashtags;
+                }
+                
+                // Switch to create tab
+                switchTab('create');
+                showNotification('success', 'Contenuto Copiato', 'Puoi modificarlo prima di pubblicare');
+            }
+        }
+
+        // Load training insights on tab switch
+        const originalSwitchTab = switchTab;
+        switchTab = function(tab) {
+            originalSwitchTab(tab);
+            if (tab === 'training') {
+                loadTrainingInsights();
+                loadDebateHistory();
+            }
+        };
+    </script>
+</body>
+</html>

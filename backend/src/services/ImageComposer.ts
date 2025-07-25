@@ -8,11 +8,23 @@ import path from 'path';
 export class ImageComposer {
   private layoutTemplates: Map<string, ImageLayout> = new Map();
   private outputDir: string;
+  private brandAssetsDir: string;
 
   constructor() {
     this.outputDir = path.join(process.cwd(), 'public', 'composed-images');
+    this.brandAssetsDir = path.join(process.cwd(), 'public', 'brand-assets');
     this.initializeLayouts();
     this.ensureOutputDirectory();
+    this.ensureBrandAssetsDirectory();
+  }
+
+  private async fileExists(filePath: string): Promise<boolean> {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async ensureOutputDirectory() {
@@ -20,6 +32,14 @@ export class ImageComposer {
       await fs.mkdir(this.outputDir, { recursive: true });
     } catch (error) {
       console.error('Error creating output directory:', error);
+    }
+  }
+
+  private async ensureBrandAssetsDirectory() {
+    try {
+      await fs.mkdir(this.brandAssetsDir, { recursive: true });
+    } catch (error) {
+      console.error('Error creating brand assets directory:', error);
     }
   }
 
@@ -65,6 +85,45 @@ export class ImageComposer {
         positions: [{ x: 0, y: 0, width: 1080, height: 1080 }]
       }]
     ]);
+  }
+
+  async createTextImage(options: {
+    text: string;
+    template?: string;
+    backgroundColor?: string;
+    textColor?: string;
+    width?: number;
+    height?: number;
+  }): Promise<string> {
+    const {
+      text,
+      backgroundColor = '#1a73e8',
+      textColor = '#ffffff',
+      width = 1080,
+      height = 1080
+    } = options;
+
+    const image = await Jimp.create(width, height, backgroundColor);
+    const font = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE);
+    
+    // Add text to image
+    image.print(
+      font,
+      0,
+      0,
+      {
+        text: text,
+        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+        alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
+      },
+      width,
+      height
+    );
+
+    const outputPath = path.join(this.outputDir, `text_${Date.now()}.png`);
+    await image.writeAsync(outputPath);
+    
+    return outputPath;
   }
 
   async composeImages(imageUrls: string[], layoutName: string = 'single'): Promise<ComposedImage> {
@@ -245,5 +304,204 @@ export class ImageComposer {
     }
     
     return outputPath;
+  }
+
+  async saveBrandLogo(logoBuffer: Buffer, filename: string): Promise<string> {
+    const logoPath = path.join(this.brandAssetsDir, `logo_${filename}`);
+    await fs.writeFile(logoPath, logoBuffer);
+    return logoPath;
+  }
+
+  async saveBrandBackground(backgroundBuffer: Buffer, filename: string): Promise<string> {
+    const bgPath = path.join(this.brandAssetsDir, `bg_${filename}`);
+    await fs.writeFile(bgPath, backgroundBuffer);
+    return bgPath;
+  }
+
+  async composeWithBrandAssets(
+    aiImageUrl: string,
+    options: {
+      platform?: string;
+      logoPath?: string;
+      backgroundPath?: string;
+      templatePath?: string;
+      logoPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+      logoSize?: number;
+      overlayOpacity?: number;
+      supabase?: any;
+    } = {}
+  ): Promise<string> {
+    const {
+      platform,
+      logoPath,
+      backgroundPath,
+      templatePath,
+      logoPosition = 'bottom-right',
+      logoSize = 150,
+      overlayOpacity = 0.9,
+      supabase
+    } = options;
+
+    // Download AI-generated image
+    const aiImageBuffer = await this.downloadImage(aiImageUrl);
+    const timestamp = Date.now();
+    let composedImagePath = path.join(this.outputDir, `branded_${timestamp}.png`);
+
+    // Fetch assets from Supabase if provided
+    let logoBuffer: Buffer | undefined;
+    let backgroundBuffer: Buffer | undefined;
+    
+    if (supabase) {
+      // Fetch logo from Supabase
+      if (logoPath) {
+        const { data: logoAsset } = await supabase
+          .from('brand_assets')
+          .select('file_url')
+          .eq('id', logoPath)
+          .single();
+        
+        if (logoAsset?.file_url) {
+          // Extract base64 data from data URL
+          const base64Data = logoAsset.file_url.split(',')[1];
+          logoBuffer = Buffer.from(base64Data, 'base64');
+        }
+      }
+      
+      // Fetch background/template from Supabase
+      if (backgroundPath || templatePath) {
+        const assetId = backgroundPath || templatePath;
+        const { data: bgAsset } = await supabase
+          .from('brand_assets')
+          .select('file_url')
+          .eq('id', assetId)
+          .single();
+        
+        if (bgAsset?.file_url) {
+          // Extract base64 data from data URL
+          const base64Data = bgAsset.file_url.split(',')[1];
+          backgroundBuffer = Buffer.from(base64Data, 'base64');
+        }
+      }
+    } else {
+      // Use file paths directly if no Supabase
+      if (logoPath && await this.fileExists(logoPath)) {
+        logoBuffer = await fs.readFile(logoPath);
+      }
+      if (backgroundPath && await this.fileExists(backgroundPath)) {
+        backgroundBuffer = await fs.readFile(backgroundPath);
+      }
+    }
+
+    // Start with background or AI image
+    let baseImage: sharp.Sharp;
+    if (backgroundBuffer) {
+      // Use brand background as base
+      baseImage = sharp(backgroundBuffer);
+      const bgMetadata = await baseImage.metadata();
+      
+      // Overlay AI image with opacity
+      const aiImageResized = await sharp(aiImageBuffer)
+        .resize(Math.floor(bgMetadata.width! * 0.8), Math.floor(bgMetadata.height! * 0.8), { fit: 'inside' })
+        .composite([{
+          input: Buffer.from(
+            `<svg width="${Math.floor(bgMetadata.width! * 0.8)}" height="${Math.floor(bgMetadata.height! * 0.8)}">
+              <rect width="100%" height="100%" fill="white" opacity="${overlayOpacity}"/>
+            </svg>`
+          ),
+          blend: 'dest-in'
+        }])
+        .toBuffer();
+
+      baseImage = await baseImage.composite([{
+        input: aiImageResized,
+        gravity: 'center'
+      }]);
+    } else {
+      // Use AI image as base
+      baseImage = sharp(aiImageBuffer);
+    }
+
+    const metadata = await baseImage.metadata();
+    const compositeImages = [];
+
+    // Add logo if provided
+    if (logoBuffer) {
+      const resizedLogoBuffer = await sharp(logoBuffer)
+        .resize(logoSize, logoSize, { fit: 'inside' })
+        .toBuffer();
+
+      let logoTop = 20;
+      let logoLeft = 20;
+
+      switch (logoPosition) {
+        case 'top-right':
+          logoLeft = metadata.width! - logoSize - 20;
+          break;
+        case 'bottom-left':
+          logoTop = metadata.height! - logoSize - 20;
+          break;
+        case 'bottom-right':
+          logoTop = metadata.height! - logoSize - 20;
+          logoLeft = metadata.width! - logoSize - 20;
+          break;
+        case 'center':
+          logoTop = (metadata.height! - logoSize) / 2;
+          logoLeft = (metadata.width! - logoSize) / 2;
+          break;
+      }
+
+      compositeImages.push({
+        input: resizedLogoBuffer,
+        top: logoTop,
+        left: logoLeft
+      });
+    }
+
+    // Save the composed image
+    await baseImage
+      .composite(compositeImages)
+      .toFile(composedImagePath);
+
+    return composedImagePath;
+  }
+
+  async createBrandedVariations(
+    aiImageUrl: string,
+    brandAssets: {
+      logoPath?: string;
+      backgroundPaths?: string[];
+    }
+  ): Promise<string[]> {
+    const variations: string[] = [];
+
+    // Original AI image
+    const timestamp = Date.now();
+    const originalPath = path.join(this.outputDir, `original_${timestamp}.png`);
+    const imageBuffer = await this.downloadImage(aiImageUrl);
+    await fs.writeFile(originalPath, imageBuffer);
+    variations.push(originalPath);
+
+    // With logo only
+    if (brandAssets.logoPath) {
+      const withLogo = await this.composeWithBrandAssets(aiImageUrl, {
+        logoPath: brandAssets.logoPath,
+        logoPosition: 'bottom-right'
+      });
+      variations.push(withLogo);
+    }
+
+    // With different backgrounds
+    if (brandAssets.backgroundPaths && brandAssets.backgroundPaths.length > 0) {
+      for (let i = 0; i < Math.min(brandAssets.backgroundPaths.length, 3); i++) {
+        const withBg = await this.composeWithBrandAssets(aiImageUrl, {
+          logoPath: brandAssets.logoPath,
+          backgroundPath: brandAssets.backgroundPaths[i],
+          logoPosition: 'bottom-right'
+        });
+        variations.push(withBg);
+      }
+    }
+
+    return variations;
   }
 }

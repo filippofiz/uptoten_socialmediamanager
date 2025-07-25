@@ -12,36 +12,43 @@
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["social-media", "manager", "automation"],
+  "keywords": [
+    "social-media",
+    "manager",
+    "automation"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "dotenv": "^16.3.1",
-    "node-cron": "^3.0.3",
+    "@anthropic-ai/sdk": "^0.57.0",
+    "@supabase/supabase-js": "^2.52.1",
+    "@types/multer": "^2.0.0",
     "axios": "^1.6.2",
-    "openai": "^4.20.0",
-    "sharp": "^0.33.0",
     "cors": "^2.8.5",
-    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ics": "^3.7.2",
     "jimp": "^0.22.10",
-    "twitter-api-v2": "^1.15.2",
-    "instagram-private-api": "^1.45.3",
-    "facebook-nodejs-business-sdk": "^18.0.0",
-    "linkedin-api-client": "^0.3.0"
+    "multer": "^2.0.2",
+    "node-cron": "^3.0.3",
+    "node-schedule": "^2.1.1",
+    "node-telegram-bot-api": "^0.64.0",
+    "openai": "^4.20.0",
+    "sharp": "^0.33.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.10",
+    "@types/node": "^20.10.0",
     "@types/node-cron": "^3.0.11",
+    "@types/sharp": "^0.32.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
     "eslint": "^8.54.0",
     "jest": "^29.7.0",
-    "@types/jest": "^29.5.10",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.3.2",
     "tsx": "^4.6.2",
-    "@types/sharp": "^0.32.0"
+    "typescript": "^5.3.2"
   }
 }

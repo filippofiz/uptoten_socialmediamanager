@@ -99,7 +99,7 @@ export class AutoScheduler {
     if (!this.settings) return;
 
     // Cancella job esistenti
-    this.scheduledJobs.forEach(job => job.destroy());
+    this.scheduledJobs.forEach(job => (job as any).cancel());
     this.scheduledJobs.clear();
 
     if (!this.settings.is_active) {
@@ -217,8 +217,12 @@ export class AutoScheduler {
               imagePath: imageVariants[platform] || imageVariants.main
             };
             
-            const result = await this.socialMediaManager.postToPlatform(platform, platformContent);
-            results.push(result);
+            // Post to platform using public method
+            const result = await this.socialMediaManager.postToAllPlatforms({
+              ...platformContent,
+              platforms: [platform]
+            });
+            results.push(...result);
             
             console.log(`✅ ${platform}: Pubblicato con successo`);
           } catch (error) {

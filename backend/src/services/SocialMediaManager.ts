@@ -84,15 +84,22 @@ export class SocialMediaManager {
   }
 
   private async postToPlatform(platform: string, content: PostContent): Promise<PostResult> {
+    // Create platform-specific content with appropriate image
+    const platformContent = {
+      ...content,
+      imageUrl: content.platformImages?.[platform] || content.imageUrl,
+      imagePath: content.platformImages?.[platform] ? null : content.imagePath
+    };
+    
     switch (platform) {
       case 'twitter':
-        return await this.postToTwitter(content);
+        return await this.postToTwitter(platformContent);
       case 'instagram':
-        return await this.postToInstagram(content);
+        return await this.postToInstagram(platformContent);
       case 'facebook':
-        return await this.postToFacebook(content);
+        return await this.postToFacebook(platformContent);
       case 'linkedin':
-        return await this.postToLinkedIn(content);
+        return await this.postToLinkedIn(platformContent);
       default:
         throw new Error(`Unsupported platform: ${platform}`);
     }
@@ -109,6 +116,12 @@ export class SocialMediaManager {
 
       if (content.imagePath) {
         const mediaUpload = await this.twitterClient.v1.uploadMedia(content.imagePath);
+        mediaId = mediaUpload;
+      } else if (content.imageUrl) {
+        // Download image from URL and upload
+        const response = await fetch(content.imageUrl);
+        const buffer = await response.arrayBuffer();
+        const mediaUpload = await this.twitterClient.v1.uploadMedia(Buffer.from(buffer), { type: 'jpg' });
         mediaId = mediaUpload;
       }
 
@@ -189,16 +202,16 @@ export class SocialMediaManager {
 
       const result = await response.json();
 
-      if (result.id) {
+      if ((result as any).id) {
         return {
           platform: 'facebook',
           success: true,
-          postId: result.id,
-          url: `https://www.facebook.com/${result.id}`,
+          postId: (result as any).id,
+          url: `https://www.facebook.com/${(result as any).id}`,
           timestamp: new Date()
         };
       } else {
-        throw new Error(result.error?.message || 'Unknown error');
+        throw new Error((result as any).error?.message || 'Unknown error');
       }
     } catch (error) {
       throw new Error(`Facebook post failed: ${error.message}`);
@@ -358,7 +371,7 @@ export class SocialMediaManager {
       return {
         likes: mediaInfo.items[0].like_count,
         comments: mediaInfo.items[0].comment_count,
-        views: mediaInfo.items[0].view_count || 0
+        views: (mediaInfo.items[0] as any).view_count || 0
       };
     } catch (error) {
       console.error('Error fetching Instagram engagement:', error);
@@ -373,9 +386,9 @@ export class SocialMediaManager {
       const data = await response.json();
       
       return {
-        likes: data.likes?.summary?.total_count || 0,
-        comments: data.comments?.summary?.total_count || 0,
-        shares: data.shares?.count || 0
+        likes: (data as any).likes?.summary?.total_count || 0,
+        comments: (data as any).comments?.summary?.total_count || 0,
+        shares: (data as any).shares?.count || 0
       };
     } catch (error) {
       console.error('Error fetching Facebook engagement:', error);

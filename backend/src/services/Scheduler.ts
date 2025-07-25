@@ -26,29 +26,8 @@ export class Scheduler {
   }
 
   start() {
-    if (this.isRunning) return;
-    
-    console.log('Starting autonomous social media scheduler...');
-    this.isRunning = true;
-
-    const postFrequency = parseInt(process.env.POST_FREQUENCY_HOURS || '4');
-    this.jobs.set('main', cron.schedule(`0 */${postFrequency} * * *`, async () => {
-      await this.createAndPublishPost();
-    }));
-
-    this.jobs.set('trending', cron.schedule('0 9,13,17,21 * * *', async () => {
-      await this.createTrendingPost();
-    }));
-
-    this.jobs.set('engagement', cron.schedule('0 */6 * * *', async () => {
-      await this.checkEngagement();
-    }));
-
-    this.jobs.set('analytics', cron.schedule('0 0 * * *', async () => {
-      await this.generateDailyReport();
-    }));
-
-    this.jobs.forEach(job => job.start());
+    console.log('⚠️ SCHEDULER DISABLED - No automatic posting');
+    return; // TUTTO DISABILITATO
   }
 
   stop() {
